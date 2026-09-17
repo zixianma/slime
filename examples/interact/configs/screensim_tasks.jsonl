@@ -1,0 +1,1 @@
+{"prompt":[{"role":"user","content":"Native assistant episode"}],"metadata":{"episode":{"engine":"screensim","task_id":"lost_phone_lockdown","seed":0,"config":{"human":"scripted","persona":"baseline","observation":"frames","episode_index":0,"k_frames":2,"reward_version":"screensim_f1_v1"}}}}

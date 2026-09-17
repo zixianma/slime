@@ -1,0 +1,5 @@
+interact:
+  output_root: interact-runs/episodes
+  max_decisions: 300
+  worker_timeout: 180
+  inference_timeout: 120

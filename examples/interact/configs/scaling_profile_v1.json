@@ -1,0 +1,101 @@
+{
+  "version": "scaling-profile-v1",
+  "model": "/gpfs/scrubbed/zixianma/checkpoints/web/screensim-qwen-comparison/models/Qwen3.5-4B",
+  "seed": 20260914,
+  "concurrency": 8,
+  "max_turns": 16,
+  "max_response_tokens": 512,
+  "scenarios": {
+    "cooking": [
+      {
+        "engine": "cooking",
+        "task_id": "b3_easy_nops_hard_map_1",
+        "seed": 0,
+        "config": {
+          "human": "scripted",
+          "persona": "baseline",
+          "observation": "frames",
+          "latency_ticks": 0,
+          "scripted_accept": true,
+          "wall_seconds": 3600,
+          "reward_version": "native_outcome_v1"
+        }
+      },
+      {
+        "engine": "cooking",
+        "task_id": "b3_expert_nops_medium_map_3",
+        "seed": 0,
+        "config": {
+          "human": "scripted",
+          "persona": "baseline",
+          "observation": "frames",
+          "latency_ticks": 0,
+          "scripted_accept": true,
+          "wall_seconds": 3600,
+          "reward_version": "native_outcome_v1"
+        }
+      },
+      {
+        "engine": "cooking",
+        "task_id": "b3_master_nops_hard_map_3",
+        "seed": 0,
+        "config": {
+          "human": "scripted",
+          "persona": "baseline",
+          "observation": "frames",
+          "latency_ticks": 0,
+          "scripted_accept": true,
+          "wall_seconds": 3600,
+          "reward_version": "native_outcome_v1"
+        }
+      },
+      {
+        "engine": "cooking",
+        "task_id": "b3_medium_nops_medium_map_2",
+        "seed": 0,
+        "config": {
+          "human": "scripted",
+          "persona": "baseline",
+          "observation": "frames",
+          "latency_ticks": 0,
+          "scripted_accept": true,
+          "wall_seconds": 3600,
+          "reward_version": "native_outcome_v1"
+        }
+      }
+    ],
+    "screensim": [
+      {
+        "engine": "screensim",
+        "task_id": "parent_phone_readability",
+        "seed": 0,
+        "config": {
+          "human": "scripted",
+          "persona": "baseline",
+          "observation": "frames",
+          "episode_index": 0,
+          "k_frames": 2,
+          "reward_version": "screensim_intime_success_v1"
+        }
+      },
+      {
+        "engine": "screensim",
+        "task_id": "standby_bedside",
+        "seed": 0,
+        "config": {
+          "human": "scripted",
+          "persona": "baseline",
+          "observation": "frames",
+          "episode_index": 0,
+          "k_frames": 2,
+          "reward_version": "screensim_intime_success_v1"
+        }
+      }
+    ]
+  },
+  "mode": "live_policy_16_turn_prefix_not_RL",
+  "engine_order": [
+    "cooking",
+    "screensim"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "engine": "cooking",
+  "task_id": "b3_easy_nops_medium_map_2",
+  "seed": 0,
+  "config": {
+    "human": "scripted",
+    "persona": "baseline",
+    "observation": "text_state_map",
+    "latency_ticks": 0,
+    "wall_seconds": 1800,
+    "reward_version": "assistant_detection_v1"
+  }
+}

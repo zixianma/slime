@@ -1,0 +1,7 @@
+interact:
+  max_decisions: 300
+  worker_timeout: 180
+  inference_timeout: 240
+  worker_python: /gpfs/home/zixianma/interact/.venv/bin/python
+  fixed_eval_sampling_seed: 20260913
+  multimodal_request_format: text

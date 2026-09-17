@@ -590,7 +590,10 @@ class MegatronTrainRayActor(TrainRayActor):
         elif self.args.offload_train:
             reload_process_groups()
 
-        if num_new_engines > 0 or reconnect_rollout_engines:
+        # Offloading destroys WORLD after every publication. Reconnect even
+        # existing rollout engines so non-colocated transfer groups never retain
+        # stale ProcessGroup handles across WORLD generations.
+        if num_new_engines > 0 or reconnect_rollout_engines or self.args.offload_train:
             self.weight_updater.connect_rollout_engines(
                 rollout_engines,
                 rollout_engine_lock,
@@ -621,6 +624,9 @@ class MegatronTrainRayActor(TrainRayActor):
         if reconnect_rollout_engines:
             self.sleep()
         elif self.args.offload_train:
+            disconnect = getattr(self.weight_updater, "disconnect_rollout_engines", None)
+            if disconnect is not None:
+                disconnect()
             destroy_process_groups()
 
     def load_other_checkpoint(self, model_tag: str, path: str) -> None:

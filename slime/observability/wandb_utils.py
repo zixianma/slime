@@ -1,6 +1,8 @@
+import json
 import logging
 import os
 from copy import deepcopy
+from pathlib import Path
 
 import wandb
 
@@ -35,6 +37,9 @@ def init_wandb_primary(args):
             logger.info("W&B online mode enabled. Data will be uploaded to cloud.")
 
     offline = _is_offline_mode(args)
+    requested_id = getattr(args, "wandb_run_id", None)
+    if requested_id and (offline or (args.wandb_mode or os.environ.get("WANDB_MODE")) == "disabled"):
+        raise ValueError("Resuming a W&B run requires online logging")
 
     # Only perform explicit login when NOT offline
     if (not offline) and args.wandb_key is not None:
@@ -57,6 +62,12 @@ def init_wandb_primary(args):
         "name": run_name,
         "config": _compute_config_for_logging(args),
     }
+    if requested_id:
+        # A continuation must never silently create a different/new run.
+        init_kwargs.update(id=requested_id, resume="must")
+        # Keep the existing curve's identity rather than rename it per Slurm job.
+        init_kwargs.pop("group")
+        init_kwargs.pop("name")
 
     # Configure settings based on offline/online mode
     if offline:
@@ -72,11 +83,23 @@ def init_wandb_primary(args):
         logger.info(f"W&B logs will be stored in: {args.wandb_dir}")
 
     wandb.init(**init_kwargs)
+    if requested_id and wandb.run.id != requested_id:
+        raise RuntimeError("W&B returned a different run ID on resume")
 
     _init_wandb_common()
 
     # Set wandb_run_id in args for easy access throughout the training process
     args.wandb_run_id = wandb.run.id
+    receipt_path = getattr(args, "interact_tracking_receipt", None)
+    if receipt_path:
+        receipt = Path(receipt_path)
+        receipt.parent.mkdir(parents=True, exist_ok=True)
+        with receipt.open("x") as output:
+            json.dump({"entity": args.wandb_team, "project": args.wandb_project,
+                       "run_id": args.wandb_run_id,
+                       "start_completed_updates": getattr(args, "interact_resume_completed_updates", 0)},
+                      output, indent=2)
+            output.write("\n")
 
 
 def _compute_config_for_logging(args):

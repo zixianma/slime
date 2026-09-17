@@ -191,6 +191,20 @@ class UpdateWeightFromTensor:
         out, self.update_weight_metrics = self.update_weight_metrics, {}
         return out
 
+    def disconnect_rollout_engines(self) -> None:
+        """Drop non-colocated transfer groups before WORLD is offloaded.
+
+        Colocated IPC mappings survive WORLD reloads, but a process group that
+        includes remote rollout GPUs is invalid once destroy_process_groups()
+        runs and must be recreated on the next publication.
+        """
+        if not self.use_distribute or not self._is_distributed_src_rank or self._model_update_groups is None:
+            return
+        disconnect_rollout_engines_from_distributed(
+            self._group_name, self._model_update_groups, self.distributed_rollout_engines
+        )
+        self._model_update_groups = None
+
     def _prepare_expert_weight_batch(
         self,
         transfers: Sequence[Any],

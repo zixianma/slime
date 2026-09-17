@@ -68,3 +68,18 @@ def test_create_weight_updater_selects_implementation(monkeypatch, mode, transpo
     assert updater.model_name == "model"
     assert updater.quantization_config == {"quant_method": "test"}
     assert updater.weight_version == 7
+
+
+@pytest.mark.unit
+def test_tensor_updater_disconnects_remote_group_before_world_offload(monkeypatch):
+    from slime.backends.megatron_utils.update_weight import update_weight_from_tensor as module
+
+    calls = []
+    monkeypatch.setattr(module, "disconnect_rollout_engines_from_distributed",
+                        lambda name, group, engines: calls.append((name, group, engines)))
+    updater = types.SimpleNamespace(use_distribute=True, _is_distributed_src_rank=True,
+        _model_update_groups="stale-after-world-offload", _group_name="slime",
+        distributed_rollout_engines=["gpu2", "gpu3"])
+    module.UpdateWeightFromTensor.disconnect_rollout_engines(updater)
+    assert calls == [("slime", "stale-after-world-offload", ["gpu2", "gpu3"])]
+    assert updater._model_update_groups is None

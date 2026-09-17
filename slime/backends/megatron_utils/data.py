@@ -138,6 +138,9 @@ def get_batch(
     if multimodal_train_inputs is not None:
         multimodal_data = {}  # key -> concatenated tensor
         for mm_input_dict in multimodal_train_inputs:
+            # Disk-backed episode frames are loaded only for this micro-batch.
+            from slime.utils.multimodal_storage import materialize_multimodal
+            mm_input_dict = materialize_multimodal(mm_input_dict, tokens.device)
             if mm_input_dict is not None:
                 for key, mm_tensor in mm_input_dict.items():
                     if key not in multimodal_data:
