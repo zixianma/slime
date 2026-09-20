@@ -1,5 +1,16 @@
 # Cooking hardware-renderer experiment
 
+## Current production topology
+
+The CookSim Gemini-user launcher now runs a mandatory Vulkan renderer probe and
+a second stress test that colocates 24 renderer workers with a six-request TP1
+policy server. If that passes, each of four H200s hosts one TP1 SGLang server and
+the selected renderer GPU is shared; otherwise the launcher falls back to one
+renderer plus three policy GPUs. After every rollout, all renderer contexts must
+close before all four GPUs are reused by a TP2 x DP2 learner. See
+[COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md). The measurements below
+are the historical experiments that motivated this topology.
+
 User requested hardware rendering validation, followed by one rendering GPU plus
 one policy GPU. This is a rollout throughput experiment, **not an optimizer run**.
 No paid model API calls; human remains scripted, model is local Qwen3.5-4B.

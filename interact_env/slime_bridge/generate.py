@@ -85,17 +85,24 @@ def decision_timeout(env, spec, turns, limit):
     """Convert a policy-horizon stop into an explicit unsuccessful episode."""
     from interact_env.adapters.cooking import parse_reply
     invalid = sum(not bool(parse_reply(turn.response)) for turn in turns)
+    reward_version = spec.config.get("reward_version", "native_outcome_v1")
     receipt = env.directory / "decision_timeout.json"
     receipt.write_text(json.dumps({"outcome": "timeout", "decision_limit": limit,
                                    "completed_decisions": len(turns)}) + "\n")
     components = dict(task_success=0.0, errors_planned=0, errors_offered=0,
-                      detected_errors=0, false_flags=0, assistant_calls=len(turns),
+                      detected_errors=0, prevented_errors=0, false_flags=0,
+                      assistant_calls=len(turns),
                       invalid_responses=invalid,
                       invalid_response_fraction=invalid/max(len(turns), 1),
                       native_ticks=turns[-1].metadata.get("tick", 0),
                       decision_cap_reached=1)
-    return EpisodeResult(env.episode_id, "timeout", True, False, True, 0.0,
-                         spec.config.get("reward_version", "native_outcome_v1"),
+    # A horizon stop occurs before the native engine can emit its final report,
+    # so error-event fields remain unknown/zero. It still receives the explicit
+    # turn cost from the prevention reward; no prevention credit is fabricated.
+    reward = (-0.05 * min(len(turns) / 200, 1)
+              if reward_version == "cooking_prevention_turns_v1" else 0.0)
+    return EpisodeResult(env.episode_id, "timeout", True, False, True, reward,
+                         reward_version,
                          components, {"decision_timeout": str(receipt.resolve())})
 
 

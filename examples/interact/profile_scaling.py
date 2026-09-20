@@ -14,7 +14,10 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-MODEL = '/gpfs/scrubbed/zixianma/checkpoints/web/screensim-qwen-comparison/models/Qwen3.5-4B'
+MODEL = os.environ.get(
+    "Q35_MODEL",
+    "/gpfs/scrubbed/zixianma/checkpoints/web/screensim-qwen-comparison/models/Qwen3.5-4B",
+)
 
 
 def append(path, row):
@@ -39,8 +42,8 @@ def prepare(path):
 
 
 def server_command(port, gpu, max_running_requests=4):
-    if max_running_requests not in (4, 8):
-        raise ValueError('profile supports request limits 4 or 8')
+    if max_running_requests not in (4, 6, 8):
+        raise ValueError('profile supports request limits 4, 6, or 8')
     return [sys.executable, '-m', 'sglang.launch_server', '--model-path', MODEL,
             '--host', '127.0.0.1', '--port', str(port), '--base-gpu-id', str(gpu), '--tp-size', '1',
             '--context-length', '16384', '--mem-fraction-static', '.35', '--disable-cuda-graph',

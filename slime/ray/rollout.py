@@ -20,7 +20,7 @@ from slime.observability.rollout_metrics import log_eval_rollout_data, log_rollo
 from slime.rollout.base_types import call_rollout_fn
 from slime.rollout.sample_hooks import set_current_rollout_id
 from slime.utils.data import get_source
-from slime.utils.dp_schedule import build_dp_schedule
+from slime.utils.dp_schedule import build_dp_schedule, static_padding_sources
 from slime.utils.health_monitor import RolloutHealthMonitor
 from slime.utils.http_utils import init_http_client
 from slime.utils.misc import Box, load_function
@@ -438,6 +438,32 @@ class RolloutManager:
         rollout produced.
         """
         dp_size = self.train_parallel_config["dp_size"]
+        if not self.args.use_dynamic_batch_size:
+            mb_group = self.train_parallel_config["microbatch_group_size_per_vp_stage"]
+            vpp_size = self.train_parallel_config["vpp_size"]
+            align_to = dp_size * (mb_group if vpp_size > 1 else 1)
+            sources = static_padding_sources(
+                data["rollout_ids"],
+                global_batch_size=self.args.global_batch_size,
+                micro_batch_size=self.args.micro_batch_size,
+                align_to=align_to,
+            )
+            if sources:
+                original_size = len(data["rollout_ids"])
+                per_sample_keys = [
+                    key for key, values in data.items()
+                    if isinstance(values, list) and len(values) == original_size
+                ]
+                for source in sources:
+                    for key in per_sample_keys:
+                        value = data[key][source]
+                        if key == "loss_masks":
+                            value = [0] * len(value)
+                        data[key].append(value)
+                logger.info(
+                    "Padded static DP schedule with %d zero-loss sample(s) (%d -> %d)",
+                    len(sources), original_size, len(data["rollout_ids"]),
+                )
         total_lengths = [len(t) for t in data["tokens"]]
         data["total_lengths"] = total_lengths
 

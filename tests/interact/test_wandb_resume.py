@@ -41,6 +41,16 @@ def test_checkpoint_defaults_to_canonical_curve(args):
     assert args.interact_resume_completed_updates == 2
 
 
+def test_cooking_history_accepts_one_based_episode_metrics():
+    rows = [
+        {"train/step": 0, "train/grad_norm": 1.0, "eval/step": 0},
+        {"train/step": 1, "train/grad_norm": 1.0, "train/success": 0.8},
+        {"train/step": 2, "train/grad_norm": 1.0, "train/success": 0.9},
+        {"train/step": 3, "train/success": 0.9, "eval/step": 2},
+    ]
+    resume.validate_history(rows, 3, success_one_based=True)
+
+
 def test_parent_receipt_is_reused_and_explicit_destination_wins(args):
     from pathlib import Path
     (Path(args.load) / "wandb_run.json").write_text(json.dumps(

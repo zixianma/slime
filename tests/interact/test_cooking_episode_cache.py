@@ -48,5 +48,19 @@ def test_decision_cap_is_an_explicit_zero_reward_timeout(tmp_path):
     assert result.eligible and result.terminated and not result.truncated
     assert result.outcome == 'timeout' and result.reward == 0
     assert result.components['decision_cap_reached'] == 1
+    assert result.components['prevented_errors'] == 0
     assert result.components['assistant_calls'] == 200
     assert (tmp_path/'decision_timeout.json').is_file()
+
+
+def test_decision_cap_applies_full_prevention_reward_turn_penalty(tmp_path):
+    from interact_env.slime_bridge.generate import decision_timeout
+    env = SimpleNamespace(directory=tmp_path, episode_id='capped-prevention')
+    spec = EpisodeSpec('cooking', 'task', config={
+        'reward_version': 'cooking_prevention_turns_v1'})
+    turns = [SimpleNamespace(response='{"text":"","flag":null}', metadata={'tick':398})
+             for _ in range(200)]
+    result = decision_timeout(env, spec, turns, 200)
+    assert result.reward == pytest.approx(-0.05)
+    assert result.components['errors_planned'] == 0
+    assert result.components['decision_cap_reached'] == 1

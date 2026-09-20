@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source "$(dirname "${BASH_SOURCE[0]}")/gpu_env.sh"
-export Q35_RUNTIME=/gpfs/scrubbed/zixianma/openwebrl-runtime/screensim-qwen35-rl
+export Q35_RUNTIME="${Q35_RUNTIME:-/gpfs/scrubbed/zixianma/openwebrl-runtime/screensim-qwen35-rl}"
 export PATH="$Q35_RUNTIME/venv/bin:$PATH"
 export PYTHONPATH="$INTERACT_REPO:$Q35_RUNTIME/Megatron-LM"
 export HF_HUB_OFFLINE=1 TOKENIZERS_PARALLELISM=false

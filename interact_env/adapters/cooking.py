@@ -21,6 +21,7 @@ class CookingSpec:
     case: str = "b3_easy_nops_medium_map_2"
     persona: str = "baseline"
     human: str = "scripted"  # scripted verification human or native Gemini
+    human_model: str = "gemini-3.7-flash"
     observation: str = "text_state_map"
     latency_ticks: int = 0
     scripted_accept: bool = True
@@ -28,6 +29,7 @@ class CookingSpec:
     wall_seconds: int = 600
     renderer: str = "auto"  # Explicit experiment setting; never inherited implicitly.
     engine_root: str = str(Path(__file__).resolve().parents[3] / "cook-bench-engine")
+    case_pool: str | None = None
 
     def validate(self):
         if self.renderer not in ("auto", "swiftshader", "vulkan", "egl"):
@@ -38,8 +40,11 @@ class CookingSpec:
             raise ValueError("unsupported native observation profile")
         if self.latency_ticks < 0 or self.wall_seconds <= 0:
             raise ValueError("invalid time budget")
-        if not (Path(self.engine_root) / "bench/v5/cases_composite_v4.json").is_file():
-            raise ValueError("engine_root lacks the shipped v5 cases")
+        pool = Path(self.case_pool) if self.case_pool else Path(self.engine_root) / "bench/v5/cases_composite_v4.json"
+        if not pool.is_file():
+            raise ValueError("cooking case pool does not exist")
+        if self.human == "gemini" and self.human_model != "gemini-3.7-flash":
+            raise ValueError("Gemini-user experiment requires pinned gemini-3.7-flash")
 
 
 def parse_reply(raw: str) -> dict:
@@ -63,12 +68,13 @@ def parse_reply(raw: str) -> dict:
 def run(spec, assistant):
     spec.validate()
     root = Path(spec.engine_root).resolve()
+    case_pool = Path(spec.case_pool).resolve() if spec.case_pool else root / "bench/v5/cases_composite_v4.json"
     # Fixed, explicit worker configuration overrides inherited benchmark switches.
     for key in list(os.environ):
         if key.startswith("COOKSIM_"):
             del os.environ[key]
     os.environ.update(COOKSIM_GRID=str(root / "bench/v5/grid.json"),
-                      COOKSIM_CASES=str(root / "bench/v5/cases_composite_v4.json"),
+                      COOKSIM_CASES=str(case_pool),
                       COOKSIM_SCHED="v5", COOKSIM_PACE="tight",
                       COOKSIM_ASSIST_LATENCY=str(spec.latency_ticks),
                       COOKSIM_WALL_BUDGET=str(spec.wall_seconds))
@@ -92,6 +98,11 @@ def run(spec, assistant):
 
     client = NoModel()
     if spec.human == "gemini":
+        if not os.environ.get("GEMINI_API_KEY") and os.environ.get("GOOGLE_API_KEY"):
+            os.environ["GEMINI_API_KEY"] = os.environ["GOOGLE_API_KEY"]
+        if not os.environ.get("GEMINI_API_KEY"):
+            raise ValueError("Gemini user requires GEMINI_API_KEY or GOOGLE_API_KEY")
+        os.environ["GEMINI_MODEL"] = spec.human_model
         from genai_client import make_client
         client = make_client()
     with ExitStack() as stack:
@@ -195,7 +206,7 @@ class CookingAdapter:
         report = run(spec, policy)
         path = Path("report.json").resolve()
         path.write_text(json.dumps(report, indent=2, default=str) + "\n")
-        reward, components = score(report, reward_version)
+        reward, components = score(report, reward_version, assistant_turns=policy.calls)
         components.update(assistant_calls=policy.calls, invalid_responses=policy.invalid,
                           invalid_response_fraction=policy.invalid/max(policy.calls, 1),
                           native_ticks=report.get('ticks', 0))

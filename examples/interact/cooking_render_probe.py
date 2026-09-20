@@ -17,14 +17,15 @@ def run_probe(output, renderer='vulkan', concurrency=4, turns=4, policy_url=None
         from dataclasses import asdict
         from interact_env.slime_bridge.generate import encode_decision
         import httpx
-        model = manifest['model']
+        model = os.environ.get("Q35_MODEL", manifest["model"])
         tokenizer = AutoTokenizer.from_pretrained(model, local_files_only=True)
         processor = AutoProcessor.from_pretrained(model, local_files_only=True)
     async def worker(i):
         raw = manifest['scenarios']['cooking'][i%4]
         spec = EpisodeSpec(**{**raw, 'config':{**raw['config'], 'renderer':renderer}})
         from interact_env.slime_bridge.generate import cooking_worker_prefix
-        env = Environment(spec, target/'episodes', timeout=120, python=str(root.parent/'.venv/bin/python'),
+        worker_python = os.environ.get("COOKING_WORKER_PYTHON", str(root.parent/'.venv/bin/python'))
+        env = Environment(spec, target/'episodes', timeout=120, python=worker_python,
                           launch_prefix=cooking_worker_prefix('cooking'))
         row = dict(worker=i, task=spec.task_id, episode_id=env.episode_id, turns=0)
         start = time.monotonic()

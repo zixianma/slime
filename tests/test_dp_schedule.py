@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from slime.utils.dp_schedule import build_dp_schedule
+from slime.utils.dp_schedule import build_dp_schedule, static_padding_sources
 
 
 NUM_GPUS = 0
@@ -320,6 +320,35 @@ def test_rejects_when_fewer_rollouts_than_gbs():
     tp = make_tp(dp_size=1)
     with pytest.raises(AssertionError, match="num_rollouts"):
         build_dp_schedule(args, tp, [3] * 6, global_batch_size=4, rollout_indices=[0, 0, 1, 1, 2, 2])
+
+
+@pytest.mark.unit
+def test_static_padding_sources_aligns_each_multi_turn_step():
+    rollout_indices = [0, 0, 1, 1, 1, 2, 3, 3, 4, 5, 5]
+    # Steps (0,1,2) and (3,4,5) have 6 and 5 samples respectively. DP=2,
+    # mbs=1 needs one no-op copy only for the second step.
+    assert static_padding_sources(
+        rollout_indices, global_batch_size=3, micro_batch_size=1, align_to=2
+    ) == [10]
+
+
+@pytest.mark.unit
+def test_static_zero_loss_padding_produces_valid_dp_schedule():
+    rollout_indices = [0, 0, 1, 1, 2]
+    sources = static_padding_sources(
+        rollout_indices, global_batch_size=3, micro_batch_size=1, align_to=2
+    )
+    padded_rollouts = rollout_indices + [rollout_indices[i] for i in sources]
+    args = make_args(micro_batch_size=1)
+    partitions, mbi, nmb, _ = build_dp_schedule(
+        args, make_tp(dp_size=2), [3] * len(padded_rollouts),
+        global_batch_size=3, rollout_indices=padded_rollouts,
+    )
+    assert nmb == [3]
+    assert_invariants(
+        partitions, mbi, nmb, dp_size=2,
+        expected_global_sample_indices=range(6), total_lengths=[3] * 6,
+    )
 
 
 if __name__ == "__main__":

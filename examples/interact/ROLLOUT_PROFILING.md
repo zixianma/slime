@@ -1,5 +1,11 @@
 # Cooking versus ScreenSim rollout timing
 
+> Historical profiling record. The current CookSim path uses four TP1 policy
+> servers, GPU rendering, six requests per server, and first-four-of-five
+> speculative groups. Accepted rollout wall times have varied from roughly 65
+> to 78 minutes per 24-episode update, so the slowest valid completion still
+> dominates each group. See `COOKING_GEMINI_HANDOFF.md` for the active setup.
+
 2026-09-14: CPU recorded-action replay, not fresh model inference. Raw measurements:
 `interact-runs/rollout-profile-cpu-v1/summary.json` and per-worker
 `worker_timing.jsonl`. Same local Qwen3.5 processor, two Torch threads, sequential

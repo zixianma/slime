@@ -11,6 +11,13 @@ multimodal storage, Qwen VL models, resumable W&B logging, and safe weight-trans
 reconnection. See [RUNBOOK.md](RUNBOOK.md) for operation and
 [PROGRESS.md](PROGRESS.md) for the concise verified status.
 
+The supported CookSim RL path now uses an engine-native
+`gemini-3.7-flash` novice user, single-error scenarios, a prevention/turn reward,
+straggler-tolerant rollouts, four H200s for both inference and TP2 x DP2 learning,
+and checkpoint/W&B-safe continuation. Start with
+[COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md); it is the authoritative
+setup and collaborator handoff. Older cooking plan documents are historical.
+
 The sibling `slime-cooking/` OpenWebRL-based prototype is reference only, **not
 the project base**. Its GPU launcher and its trainer-specific assumptions do not
 apply to this checkout. Only isolated native cooking code and tested token-accounting
@@ -18,7 +25,8 @@ helpers were carried over; there are no OpenWebRL imports in this implementation
 
 The environment API is engine-neutral. Cooking and ScreenSim have native adapters;
 VH remains an explicit pending entry, not a working integration. **ScreenSim is the
-first GPU/RL target**, using Qwen2.5-VL-3B-Instruct. Native ScreenSim direct/IPC prompt
+first validated GPU/RL target**, and CookSim now has a validated Qwen3.5-4B RL path.
+Native ScreenSim direct/IPC prompt
 parity passes, as do silent/oracle controls (native F1 0/1). Two real screenshot-based
 SGLang trajectories completed through the official Slime hook, both with F1 zero.
 Subsequent official Slime training completed two optimizer steps, including a
@@ -89,10 +97,12 @@ file plus source/package provenance. Repeat `--spec` for additional tasks/config
 as their adapters become available. Training always groups continuations of the
 same complete episode specification; do not normalize across mixed engine cases.
 
-The cooking profile uses a scripted human, baseline persona, native v5 scheduler,
+The CPU smoke profile above uses a scripted human, baseline persona, native v5 scheduler,
 and explicitly fixed zero-tick assistant delay. This keeps inference/IPC wall time
 out of simulator time. It is a test/training variant, not measured-latency evaluation.
-No paid model API calls occur. Native Gemini human mode is not validated here.
+No paid model API calls occur in that smoke. The supported GPU training profile is
+different: it uses the native Gemini user and is documented in
+`COOKING_GEMINI_HANDOFF.md`.
 
 ## Official Slime integration
 
@@ -148,11 +158,21 @@ The silent scripted-human cooking control still wins in **151 ticks / 76 assista
 decisions**, despite two offered errors and zero detections. Therefore success-only
 reward does not establish useful assistance.
 
-The optional experimental `assistant_detection_v1` is
+The legacy optional `assistant_detection_v1` is
 `0.5 * won + 0.5 * detected_errors / planned_errors - min(0.1 * false_flags, 1)`.
 It scores that silent rollout 0.5. `native_outcome_v1` remains an outcome baseline.
-Neither is claimed to replace CookSim's official evaluation. QA quality, persuasion,
-persona satisfaction and latency quality require separate validation/scoring.
+The supported Gemini-user single-error run instead uses
+`cooking_prevention_turns_v1`:
+
+```text
+success + 0.30 * prevented
+        - 0.02 * min(false_flags, 15)
+        - 0.05 * min(assistant_turns / 200, 1)
+```
+
+Its success and failure ranges do not overlap. It still does not replace
+CookSim's official evaluation; QA quality, persuasion, persona satisfaction and
+latency quality require separate validation/scoring.
 Reward calculation is inside the cooking adapter, not the common trainer bridge.
 
 CPU tests cover native cooking/ScreenSim direct-call/IPC parity, cancellation and concurrent workers,
@@ -163,6 +183,14 @@ and episode reward normalization. CPU tests do not establish model inference or 
 the separate GPU rollout probe establishes real inference but not an optimizer update.
 
 ## Separate W&B project
+
+ScreenSim and CookSim use separate run identities in the same
+`interact-slime-rl` project. CookSim continuations resume the exact run ID saved
+beside the checkpoint and fail closed on metric/configuration disagreement. The
+current Gemini-user development run is
+[kv1kjbup](https://wandb.ai/zixianma/interact-slime-rl/runs/kv1kjbup); its update-3
+validation reached 80% success versus a 65% baseline over 20 attempts. This is
+an active development run, not a final benchmark result.
 
 The ScreenSim launcher now enables tracking in **`interact-slime-rl`**. It uses
 `INTERACT_WANDB_MODE=offline` by default until cloud authentication and destination
@@ -204,7 +232,13 @@ Live tracking (finished, all three steps verified against local records):
 This is a fresh online run, separate from the historical offline backfill and the
 OpenWebRL baseline. See `GPU_VALIDATION.md` for verified outcomes.
 
-## GPU readiness and next milestones
+## Historical GPU bring-up record
+
+The sections below preserve ScreenSim bring-up evidence and job-specific
+debugging history. Their words such as "current" and "active" refer to the dated
+experiment being described, not the current CookSim handoff. Use
+`PROGRESS.md`, `RUNBOOK.md`, and `COOKING_GEMINI_HANDOFF.md` for current status
+and operation.
 
 ### Frozen-policy Qwen comparison (job 292136)
 

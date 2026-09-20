@@ -25,3 +25,14 @@ def test_no_unapproved_wandb_endpoint(tmp_path):
     source.write_text("WANDB_API_KEY=fake-test-key\nWANDB_BASE_URL=https://elsewhere.invalid\n")
     with pytest.raises(ValueError, match="destination approval"):
         module.build_environment(source, {})
+
+
+def test_google_provider_key_is_loaded_without_other_provider_secrets(tmp_path):
+    wandb = tmp_path / "wandb.env"
+    wandb.write_text("WANDB_API_KEY=wandb-secret\nOPENAI_API_KEY=do-not-copy\n")
+    provider = tmp_path / "provider.env"
+    provider.write_text("GOOGLE_API_KEY=google-secret\nANTHROPIC_API_KEY=do-not-copy\n")
+    env = module.build_environment(wandb, {"PATH": "/bin"}, provider)
+    assert env["WANDB_API_KEY"] == "wandb-secret"
+    assert env["GOOGLE_API_KEY"] == "google-secret"
+    assert "OPENAI_API_KEY" not in env and "ANTHROPIC_API_KEY" not in env

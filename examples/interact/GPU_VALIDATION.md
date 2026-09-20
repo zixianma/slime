@@ -1,5 +1,23 @@
 # ScreenSim-first GPU validation
 
+## Current CookSim Gemini-user RL path — September 19, 2026
+
+The supported configuration is documented in
+[COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md). A four-H200 run passed
+renderer and shared renderer/policy preflights, operated four TP1 policy
+servers, completed TP2 x DP2 optimizer updates on all four GPUs, checkpointed
+every update, and completed a 20-episode validation at update 3. Validation
+success changed from 13/20 at baseline to 16/20 at update 3; reward changed from
+0.606 to 0.772. This is an active development result, not a final benchmark or
+significance claim. The W&B run is
+<https://wandb.ai/zixianma/interact-slime-rl/runs/kv1kjbup>.
+
+The run also exercised disk-backed visual tensors, zero-loss static-DP padding
+for variable multi-turn sample counts, first-four-of-five speculative rollout
+groups, native Gemini API calls, decision-cap rewards, and exact checkpoint/W&B
+resume guards. Historical sections below describe earlier ScreenSim and cooking
+bring-up and should not be used as the current CookSim launcher.
+
 Run: Slurm **289525**, node **g014**, September 11–12, 2026 (America/Los_Angeles).
 Approved ceiling: **2 H200 GPUs, 16 CPUs, 240 GiB RAM, one hour / two GPU-hours**.
 No additional allocation, paid model API, GitHub publishing, or baseline-job changes.

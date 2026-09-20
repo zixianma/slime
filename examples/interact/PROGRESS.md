@@ -1,23 +1,51 @@
 # Unified assistant RL progress
 
-Status snapshot: 2026-09-16 22:49 PDT.
+Status snapshot: 2026-09-19 16:00 PDT.
 
-## Environment
+| Engine | Native adapter | RL status |
+| --- | --- | --- |
+| ScreenSim | implemented | Qwen3.5-4B, 15 updates complete |
+| CookBench | implemented | Gemini-user Qwen3.5-4B run active; update 3 validated |
+| VH Streaming | planned | pending Unity lease integration |
 
-| Engine | Adapter | Native parity | RL |
-| --- | --- | --- | --- |
-| ScreenSim | implemented | CPU and GPU validated | 15 updates complete |
-| CookBench | implemented | CPU, renderer, rollout, checkpoint resume validated | update 4 running |
-| VH Streaming | planned | pending Unity lease integration | pending |
+## CookSim Gemini-user run
 
-The implementation is based on official THUDM Slime commit `4c193f1`. It provides
-engine-neutral episode/observation/action/result contracts while leaving prompts,
-actions, simulation, and grading engine-specific.
+The current supported profile uses 120 single-error training scenarios, 10
+held-out parent variants, the engine-native `gemini-3.7-flash` classic-novice
+user, Qwen3.5-4B, and the `cooking_prevention_turns_v1` reward. Each update has
+24 accepted episodes and validation has 20 stochastic episodes.
+
+| Completed updates | Success | Reward | Prevention | Timeout | Turns |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 13/20 (65%) | 0.606 | 25% | 30% | 136.2 |
+| 3 | 16/20 (80%) | 0.772 | 35% | 15% | 128.0 |
+
+Update 3 also had 5.05 false flags per episode, 5% wrong serves, no burns, and a
+3.8% invalid-response fraction. The improvement is encouraging but not yet
+reliable: the user and policy are stochastic and validation has only 20 attempts.
+
+The active experiment is tracked at
+<https://wandb.ai/zixianma/interact-slime-rl/runs/kv1kjbup>. This table is a
+snapshot, not the final update-9 result. The operational setup—not the live job
+IDs or site paths—is captured in
+[COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md).
+
+Verified pipeline properties:
+
+- four TP1 policy servers coexist with Vulkan rendering after a stress preflight;
+- all four H200s are reused for TP2 x DP2 optimization;
+- first-four-of-five speculative groups tolerate one straggler/failure;
+- visual tensors spill to disk and materialize per microbatch;
+- static DP schedules add zero-loss padding when multi-turn sample counts do not align;
+- each completed update has a checkpoint and continuations verify W&B history;
+- decision-cap timeouts receive the configured turn cost without fabricated
+  prevention credit;
+- full visual-tensor debug serialization is disabled.
 
 ## ScreenSim result
 
-Qwen3.5-4B completed 15 GRPO updates. Checkpoint verification passed, language
-weights changed, and 297 frozen vision shards remained unchanged.
+Qwen3.5-4B completed 15 GRPO updates. Checkpoint verification passed and the
+vision tower remained frozen.
 
 | Completed update | Validation success | Task-macro success |
 | ---: | ---: | ---: |
@@ -28,29 +56,6 @@ weights changed, and 297 frozen vision shards remained unchanged.
 | 12 | 35/48 (72.9%) | 77.5% |
 | 15 | 34/48 (70.8%) | 75.8% |
 
-These are repeated fixed validation attempts, not a statistical significance claim.
-The canonical W&B run is
-<https://wandb.ai/zixianma/interact-slime-rl/runs/d0df345ba8f8> and has verified
-train steps 0–14 and eval steps 0, 2, 6, 9, 12, and 15. The public paired replay is
-<https://zixianma.github.io/screensim-validation-replay/>.
-
-## Cooking run
-
-Run root: `/gpfs/scrubbed/zixianma/checkpoints/web/cooking-full-295856`.
-Model: Qwen3.5-4B. Human: scripted/programmatic. No paid model API calls.
-
-- Authoritative committed state: 3 completed updates; validation update 3 complete.
-- Validation 3: 1/40 success (2.5%); 38 wrong serves, one burn, one win.
-- Update 3 learner workload: 7,333 microbatches / 46,382,704 tokens in 3,868 s.
-- Update 4 collected 48 fresh episodes and entered a 3,779-microbatch optimizer pass.
-- Active allocation: Slurm 298131, 4 H200, scheduled to end 2026-09-17 02:21 PDT.
-- Queued continuation: Slurm 298666, 4 H200 / 32 CPU / 240 GiB / 8 h,
-  dependency `afterany:298131`.
-
-The active job inherited a TP2 x DP1 learner and therefore uses only two GPUs during
-optimization. The queued continuation corrects this to TP1 x DP4. Static checks and
-13 targeted tests pass; GPU checkpoint resharding, memory fit, and measured speedup
-remain to be verified when job 298666 starts. If TP1 is not viable, use TP2 x DP2,
-not the old TP2 x DP1 layout.
-
-Target completion remains 12 updates with validation recorded at 3, 6, 9, and 12.
+These are repeated fixed validation attempts, not a statistical significance
+claim. The canonical W&B run is
+<https://wandb.ai/zixianma/interact-slime-rl/runs/d0df345ba8f8>.

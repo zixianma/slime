@@ -7,16 +7,19 @@ from examples.interact.merge_qwen35_wandb import CONFIG_KEYS
 CANONICAL_PATH = "zixianma/interact-slime-rl/d0df345ba8f8"
 
 
-def validate_history(rows, completed):
+def validate_history(rows, completed, *, success_one_based=False):
     """Require complete optimizer/episode history up to, but not beyond, the load."""
     from examples.interact.merge_qwen35_wandb import points
 
     expected = set(range(completed))
-    for metric in ("train/grad_norm", "train/success"):
-        if set(points(rows, metric, "train/step")) != expected:
+    expected_success = set(range(1, completed + 1)) if success_one_based else expected
+    for metric, metric_expected in (("train/grad_norm", expected),
+                                    ("train/success", expected_success)):
+        if set(points(rows, metric, "train/step")) != metric_expected:
             raise ValueError(f"W&B/checkpoint mismatch for {metric}; reconcile history before resuming")
     for row in rows:
-        for axis, upper in (("train/step", completed-1), ("rollout/step", completed-1),
+        train_upper = completed if success_one_based else completed - 1
+        for axis, upper in (("train/step", train_upper), ("rollout/step", completed-1),
                             ("eval/step", completed)):
             value = row.get(axis)
             if value is not None and (not isinstance(value, (int, float)) or
@@ -70,7 +73,10 @@ def configure_tracking(args, env, api=None):
     for key in CONFIG_KEYS:
         if key not in run.config or run.config[key] != getattr(args, key, None):
             raise ValueError(f"W&B resume configuration mismatch: {key}")
-    validate_history(list(run.scan_history(page_size=100)), completed)
+    validate_history(
+        list(run.scan_history(page_size=100)), completed,
+        success_one_based=getattr(args, "interact_engine", None) == "cooking",
+    )
     args.wandb_run_id = parts[2]
     args.interact_resume_completed_updates = completed
     args.interact_tracking_receipt = str(Path(args.save) / "wandb_run.json")

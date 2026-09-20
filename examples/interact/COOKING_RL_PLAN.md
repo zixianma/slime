@@ -1,8 +1,9 @@
 # Cooking RL in the shared Slime environment
 
-> Historical planning and debugging log. The current 12-update schedule, launch
-> procedure, and live status are maintained in [RUNBOOK.md](RUNBOOK.md) and
-> [PROGRESS.md](PROGRESS.md).
+> Historical scripted-user planning and debugging log. The supported CookSim
+> setup is maintained in
+> [COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md),
+> [RUNBOOK.md](RUNBOOK.md), and [PROGRESS.md](PROGRESS.md).
 
 ## Full training first segment: 295856
 

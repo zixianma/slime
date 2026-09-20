@@ -48,6 +48,35 @@ from slime.utils.seqlen_balancing import expand_bins_by_splitting, first_fit_pac
 logger = logging.getLogger(__name__)
 
 
+def static_padding_sources(
+    rollout_indices: list[int], *, global_batch_size: int, micro_batch_size: int, align_to: int
+) -> list[int]:
+    """Return sample positions to copy as zero-loss static-batch padding.
+
+    Multi-turn rollouts can emit an arbitrary number of training samples. For
+    static micro-batches, each global step nevertheless needs a micro-batch
+    count divisible by the DP/VPP alignment. Padding with a copied forward
+    whose loss mask is zero keeps fixed-size GDN micro-batches and collective
+    call counts identical on every DP rank.
+    """
+    assert global_batch_size > 0 and micro_batch_size > 0 and align_to > 0
+    by_rollout: dict[int, list[int]] = {}
+    for pos, rid in enumerate(rollout_indices):
+        by_rollout.setdefault(rid, []).append(pos)
+    rollout_ids = list(by_rollout)
+    sources: list[int] = []
+    for step_start in range(0, len(rollout_ids) - global_batch_size + 1, global_batch_size):
+        step_ids = rollout_ids[step_start : step_start + global_batch_size]
+        positions = [pos for rid in step_ids for pos in by_rollout[rid]]
+        n = len(positions)
+        mbs = (n + micro_batch_size - 1) // micro_batch_size
+        aligned_mbs = ((mbs + align_to - 1) // align_to) * align_to
+        pad = aligned_mbs * micro_batch_size - n
+        if pad:
+            sources.extend([positions[-1]] * pad)
+    return sources
+
+
 def _calculate_workloads(step_lengths, args):
     return [calculate_fwd_flops([sl], args) for sl in step_lengths]
 
