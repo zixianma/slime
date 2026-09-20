@@ -142,8 +142,9 @@ ls "$COOKING_GEMINI_RUN_DIR/audit"/speculative-rollout-*.json
 
 Checkpoint directory `iter_0000002` means rollout IDs 0--2 are committed: three
 completed updates. Training episode metrics use one-based `train/step`; optimizer
-metrics use zero-based `train/step`. Validation uses the number of completed
-updates (`eval/step` 0, 3, 6, 9).
+metrics use zero-based `train/step`. Validation is scheduled after 0, 3, 6, 9,
+and 12 completed updates, while this pipeline's W&B `eval/step` records the
+evaluated rollout ID: 0 for the pre-training baseline, then 2, 5, 8, and 11.
 
 Treat validation as noisy because the user and policy are stochastic and there
 are only 20 attempts. Compare success, reward, prevention, timeout, wrong-serve,

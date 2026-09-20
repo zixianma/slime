@@ -57,7 +57,8 @@ find "$COOKING_GEMINI_RUN_DIR/audit" -maxdepth 1 -name 'speculative-rollout-*.js
 ```
 
 `iter_0000002` is the checkpoint after three completed updates. Validation uses
-one point at `eval/step=3`; episode metrics use one-based train steps while
+one point at `eval/step=2` (the evaluated rollout ID, corresponding to three
+completed updates); episode metrics use one-based train steps while
 optimizer metrics use zero-based train steps.
 
 ## Failure handling
