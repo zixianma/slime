@@ -127,7 +127,9 @@ sbatch examples/interact/cooking_gemini/train.sbatch
 Resume fails before training if checkpoint metadata, optimizer/scheduler state,
 W&B history, data hashes, model/sampling configuration, or run identity disagree.
 Every completed update is checkpointed, so an allocation timeout loses at most
-the in-progress rollout/update.
+the in-progress rollout/update. If an allocation ends after a boundary checkpoint
+but during its validation, the continuation detects the missing W&B point and
+replays that exact checkpoint validation before collecting the next update.
 
 ## Monitoring and interpretation
 

@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from examples.interact.merge_qwen35_wandb import CONFIG_KEYS
+from examples.interact.merge_qwen35_wandb import CONFIG_KEYS, points
 
 CANONICAL_PATH = "zixianma/interact-slime-rl/d0df345ba8f8"
 
@@ -73,12 +73,22 @@ def configure_tracking(args, env, api=None):
     for key in CONFIG_KEYS:
         if key not in run.config or run.config[key] != getattr(args, key, None):
             raise ValueError(f"W&B resume configuration mismatch: {key}")
+    rows = list(run.scan_history(page_size=100))
     validate_history(
-        list(run.scan_history(page_size=100)), completed,
+        rows, completed,
         success_one_based=getattr(args, "interact_engine", None) == "cooking",
     )
     args.wandb_run_id = parts[2]
     args.interact_resume_completed_updates = completed
+    eval_steps = set(points(rows, "eval/success", "eval/step"))
+    boundary_eval_step = completed - 1
+    args.interact_resume_eval_step = (
+        boundary_eval_step
+        if (getattr(args, "interact_engine", None) == "cooking"
+            and args.eval_interval and completed % args.eval_interval == 0
+            and boundary_eval_step not in eval_steps)
+        else None
+    )
     args.interact_tracking_receipt = str(Path(args.save) / "wandb_run.json")
     args.interact_canonical_wandb_path = target
     print(f"WANDB_RESUME_VERIFIED {target} completed_updates={completed}", flush=True)

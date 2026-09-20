@@ -32,6 +32,18 @@ def train(args):
     if args.offload_rollout:
         ray.get(rollout_manager.onload_kv.remote())
 
+    # A wall-clock allocation can end after a checkpoint commits but while the
+    # boundary evaluation is still running. A verified continuation explicitly
+    # replays that missing evaluation before collecting the next policy batch.
+    resume_eval_step = getattr(args, "interact_resume_eval_step", None)
+    if resume_eval_step is not None:
+        if resume_eval_step + 1 != args.start_rollout_id:
+            raise ValueError(
+                f"resume eval step {resume_eval_step} disagrees with checkpoint "
+                f"start rollout {args.start_rollout_id}"
+            )
+        ray.get(rollout_manager.eval.remote(rollout_id=resume_eval_step))
+
     # special case for eval-only
     if args.num_rollout == 0 and args.eval_interval is not None:
         ray.get(rollout_manager.eval.remote(rollout_id=0))
