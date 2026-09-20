@@ -73,7 +73,10 @@ def init_wandb_primary(args):
     if offline:
         init_kwargs["settings"] = wandb.Settings(mode="offline")
     else:
-        init_kwargs["settings"] = wandb.Settings(mode="shared", x_primary=True)
+        # All Ray workers forward metrics to one logger actor. Keep exactly one
+        # cloud writer: W&B shared mode can reject worker attachment to a
+        # resumed run (and has had history-offset corruption bugs).
+        init_kwargs["settings"] = wandb.Settings(mode="online")
 
     # Add custom directory if specified
     if args.wandb_dir:
@@ -154,28 +157,23 @@ def init_wandb_secondary(args, role=None):
 
     offline = _is_offline_mode(args)
 
-    if (not offline) and args.wandb_key is not None:
-        wandb.login(key=args.wandb_key, host=args.wandb_host)
-
-    # Configure settings based on offline/online mode
-    if offline:
-        settings_kwargs = dict(mode="offline")
-    else:
-        settings_kwargs = dict(
-            mode="shared",
-            x_primary=False,
-            x_update_finish_state=False,
+    if not offline:
+        raise RuntimeError(
+            "Online W&B workers must forward metrics through the single-writer logger actor"
         )
+
+    settings_kwargs = dict(mode="offline")
 
     init_kwargs = {
         "id": wandb_run_id,
         "entity": args.wandb_team,
         "project": args.wandb_project,
         "config": _compute_secondary_config_for_logging(args, role=role),
-        "resume": "allow",
         "reinit": True,
         "settings": wandb.Settings(**settings_kwargs),
     }
+
+    init_kwargs["resume"] = "allow"
 
     # Add custom directory if specified
     if args.wandb_dir:

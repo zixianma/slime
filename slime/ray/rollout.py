@@ -116,7 +116,7 @@ class RolloutManager:
     def dispose(self):
         for monitor in self._health_monitors:
             monitor.stop()
-        logging_utils.finish_tracking(self.args)
+        logging_utils.finish_tracking(self.args, primary=False)
 
     @property
     def server(self) -> Any | None:

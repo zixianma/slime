@@ -66,7 +66,8 @@ def test_cooking_resume_replays_missing_boundary_eval(args):
         {"train/step": i + 1, "train/success": .6}
         for i in range(3)
     ] + [{"eval/step": 0, "eval/success": .65}]
-    resume.configure_tracking(args, {}, fake_api(args, rows))
+    api = fake_api(args, rows)
+    resume.configure_tracking(args, {}, api)
     assert args.interact_resume_completed_updates == 3
     assert args.interact_resume_eval_step == 2
 
@@ -133,6 +134,7 @@ def test_primary_uses_must_resume_keeps_name_and_saves_identity(args, monkeypatc
     kwargs = init.call_args.kwargs
     assert kwargs["id"] == "d0df345ba8f8" and kwargs["resume"] == "must"
     assert "name" not in kwargs and "group" not in kwargs
+    assert kwargs["settings"].mode == "online"
     assert json.loads(Path(args.interact_tracking_receipt).read_text())["run_id"] == "d0df345ba8f8"
     metrics.assert_any_call("train/*", step_metric="train/step")
     metrics.assert_any_call("eval/*", step_metric="eval/step")
@@ -156,13 +158,26 @@ def test_fresh_run_does_not_request_resume(args, monkeypatch):
     assert args.wandb_run_id == "new"
 
 
-def test_secondary_receives_same_id(args, monkeypatch):
+def test_online_direct_secondary_is_rejected(args):
     args.wandb_run_id = "canonical"
-    init = Mock()
-    monkeypatch.setattr(wandb_utils.wandb, "init", init)
-    monkeypatch.setattr(wandb_utils.wandb, "define_metric", Mock())
-    wandb_utils.init_wandb_secondary(args)
-    assert init.call_args.kwargs["id"] == "canonical"
+    with pytest.raises(RuntimeError, match="single-writer"):
+        wandb_utils.init_wandb_secondary(args)
+
+
+def test_single_writer_actor_serializes_metrics(args, monkeypatch):
+    from slime.observability import logging_utils
+
+    monkeypatch.setattr(wandb_utils, "init_wandb_primary", Mock())
+    log = Mock()
+    finish = Mock()
+    monkeypatch.setattr(logging_utils.wandb, "log", log)
+    monkeypatch.setattr(wandb_utils.wandb, "finish", finish)
+    actor = logging_utils._WandbLoggerActor(args)
+    actor.log({"train/step": 2})
+    assert actor.count() == 1
+    log.assert_called_once_with({"train/step": 2})
+    actor.finish()
+    finish.assert_called_once_with()
 
 
 def test_credential_wrapper_preserves_explicit_interact_destination(tmp_path):

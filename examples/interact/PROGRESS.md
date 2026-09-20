@@ -1,11 +1,11 @@
 # Unified assistant RL progress
 
-Status snapshot: 2026-09-19 16:00 PDT.
+Status snapshot: 2026-09-19 23:30 PDT.
 
 | Engine | Native adapter | RL status |
 | --- | --- | --- |
 | ScreenSim | implemented | Qwen3.5-4B, 15 updates complete |
-| CookBench | implemented | Gemini-user Qwen3.5-4B run active; update 3 validated |
+| CookBench | implemented | Gemini-user Qwen3.5-4B run active; 6 updates checkpointed, update-6 validation active |
 | VH Streaming | planned | pending Unity lease integration |
 
 ## CookSim Gemini-user run
@@ -38,6 +38,7 @@ Verified pipeline properties:
 - visual tensors spill to disk and materialize per microbatch;
 - static DP schedules add zero-loss padding when multi-turn sample counts do not align;
 - each completed update has a checkpoint and continuations verify W&B history;
+- one Ray logger actor serializes all online W&B writes, including resumed jobs;
 - decision-cap timeouts receive the configured turn cost without fabricated
   prevention credit;
 - full visual-tensor debug serialization is disabled.

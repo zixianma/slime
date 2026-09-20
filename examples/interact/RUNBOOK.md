@@ -13,6 +13,8 @@ lease adapter. For the production CookSim path, follow
 - Keep generated splits immutable and verify their hashes at startup.
 - Checkpoint every completed update before advancing policy weights.
 - Resume the exact W&B run associated with the checkpoint; never merge engines.
+- Keep one online W&B writer per job. Ray workers forward metrics through the
+  logger actor and must not attach to the cloud run independently.
 - Keep credentials, datasets, checkpoints, episodes, browser output, and
   `interact-runs/` out of Git.
 
@@ -71,6 +73,8 @@ optimizer metrics use zero-based train steps.
   checkpoint from W&B alone.
 - Resume rejection: reconcile checkpoint metadata, W&B history, split hashes,
   and hyperparameters. Do not disable the guard.
+- W&B reports the run ID is already in use: verify the single-writer logger
+  actor path is enabled; W&B shared mode is not supported for continuations.
 - Gemini quota/provider failure: stop and repair credentials/quota; do not turn
   API failures into task rewards.
 

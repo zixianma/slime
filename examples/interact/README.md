@@ -187,6 +187,8 @@ the separate GPU rollout probe establishes real inference but not an optimizer u
 ScreenSim and CookSim use separate run identities in the same
 `interact-slime-rl` project. CookSim continuations resume the exact run ID saved
 beside the checkpoint and fail closed on metric/configuration disagreement. The
+online training process uses one Ray logger actor as the sole W&B writer; Ray
+workers forward metrics and never attach as shared cloud writers. The
 current Gemini-user development run is
 [kv1kjbup](https://wandb.ai/zixianma/interact-slime-rl/runs/kv1kjbup); its update-3
 validation reached 80% success versus a 65% baseline over 20 attempts. This is

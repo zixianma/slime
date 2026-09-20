@@ -34,6 +34,9 @@ report, while Slime trains a local Qwen3.5-4B assistant with GRPO.
   SGLang servers when renderer/policy colocation passes; otherwise it safely
   falls back to one renderer plus three policy servers. Learning uses all four
   GPUs as TP2 x DP2.
+- Tracking: one Ray logger actor is the sole online W&B writer. Driver and
+  rollout workers forward metrics to it instead of attaching multiple shared
+  writers to the same cloud run. This is required for reliable continuation.
 
 The first run of this exact profile improved 20-episode validation success from
 13/20 (65%) at update 0 to 16/20 (80%) at update 3; reward increased from 0.606
@@ -130,6 +133,8 @@ Every completed update is checkpointed, so an allocation timeout loses at most
 the in-progress rollout/update. If an allocation ends after a boundary checkpoint
 but during its validation, the continuation detects the missing W&B point and
 replays that exact checkpoint validation before collecting the next update.
+The resumed process still has only one W&B cloud writer; do not re-enable W&B
+shared mode or initialize W&B independently inside Ray workers.
 
 ## Monitoring and interpretation
 
