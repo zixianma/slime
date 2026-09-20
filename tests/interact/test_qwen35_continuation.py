@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from examples.interact import qwen35_continue_eval as schedule
+from examples.interact.models.qwen35 import qwen35_continue_eval as schedule
 
 
 @pytest.mark.parametrize('steps,completed', [({6,9},3),({6,9},6),({6,9},9),
@@ -41,7 +41,7 @@ def test_resume_profiles_preserve_existing_and_new_plans(monkeypatch,name,start,
     import runpy
     from pathlib import Path
     monkeypatch.setenv('Q35_CONTINUATION_PROFILE', name)
-    profile = runpy.run_path(str(Path(__file__).resolve().parents[2]/'examples/interact/qwen35_continue_profile.py'))
+    profile = runpy.run_path(str(Path(__file__).resolve().parents[2]/'examples/interact/models/qwen35/qwen35_continue_profile.py'))
     assert (profile['START'],profile['TARGET'],profile['EVAL_STEPS']) == (start,target,steps)
     assert profile['SAMPLER']['sample_index'] == cursor
     assert profile['SAMPLER']['sample_group_index'] == cursor//8

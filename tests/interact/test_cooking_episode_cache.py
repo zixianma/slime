@@ -2,7 +2,7 @@ from dataclasses import asdict
 from types import SimpleNamespace
 import pytest
 from interact_env.protocol import EpisodeSpec
-from examples.interact.cooking_episode_cache import EpisodeCache
+from examples.interact.cooking_gemini.cooking_episode_cache import EpisodeCache
 
 
 def fixture():

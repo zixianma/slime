@@ -1,8 +1,8 @@
 import json
 import sys
 from types import SimpleNamespace
-from examples.interact.cooking_full_training import train, configure, BudgetPause
-from examples.interact.cooking_training_plan import SPLIT
+from examples.interact.archive.cooking_calibration.cooking_full_training import train, configure, BudgetPause
+from examples.interact.archive.cooking_calibration.cooking_training_plan import SPLIT
 import pytest
 
 
@@ -12,7 +12,7 @@ class Remote:
 
 
 def test_optimizer_reserve_scales_with_real_batch_work():
-    from examples.interact.cooking_full_training import optimizer_reserve
+    from examples.interact.archive.cooking_calibration.cooking_full_training import optimizer_reserve
     assert optimizer_reserve({}, {'turns':8000, 'tokens':100000}) == 8600
     previous = dict(optimizer_s=2600, optimizer_workload={'turns':5000, 'tokens':100000})
     assert optimizer_reserve(previous, {'turns':10000, 'tokens':300000}) == 10350
@@ -29,7 +29,7 @@ def test_full_loop_sparse_eval_and_checkpoints(tmp_path, monkeypatch, defer_base
         wait=lambda refs,timeout:(refs,[]) if next(polls) else ([],refs)))
     monkeypatch.setattr('slime.observability.logging_utils.log',
                         lambda args,values,step_key:heartbeats.append(values))
-    monkeypatch.setattr('examples.interact.cooking_gpu_handoff.assert_no_graphics', lambda:{'graphics_processes':[]})
+    monkeypatch.setattr('examples.interact.cooking_gemini.cooking_gpu_handoff.assert_no_graphics', lambda:{'graphics_processes':[]})
     updates, saves, evals, sampler_saves = [], [], [], []
     actor = SimpleNamespace(update_weights=lambda:None, async_train=lambda i,data:updates.append(i),
                             save_model=lambda i,force_sync:saves.append(i))

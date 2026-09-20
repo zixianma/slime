@@ -1,6 +1,6 @@
 import pytest
-from examples.interact import cooking_gpu_handoff as handoff
-from examples.interact.cooking_acceptance_controller import stages, ALLOCATION_SECONDS, CLEANUP_SECONDS
+from examples.interact.cooking_gemini import cooking_gpu_handoff as handoff
+from examples.interact.archive.cooking_calibration.cooking_acceptance_controller import stages, ALLOCATION_SECONDS, CLEANUP_SECONDS
 
 
 def test_acceptance_budget_and_single_rollout_gpu():

@@ -124,13 +124,13 @@ async def generate(args, sample, sampling_params, evaluation=False):
                            {**spec.config, 'renderer': settings['cooking_renderer']})
     episode_cache = None
     if spec.engine == 'cooking' and not evaluation and os.environ.get('COOKING_EPISODE_CACHE') == '1':
-        from examples.interact.cooking_episode_cache import EpisodeCache, identity
+        from examples.interact.cooking_gemini.cooking_episode_cache import EpisodeCache, identity
         episode_cache = EpisodeCache(os.environ['COOKING_RUN_DIR'], identity(args, sample, spec, sampling_params))
         cached = await asyncio.to_thread(episode_cache.load)
         if cached is not None:
             return cached
     if spec.engine == 'cooking' and not evaluation and os.environ.get('COOKING_RECOVERY_MANIFEST'):
-        from examples.interact.cooking_recover_episodes import recover
+        from examples.interact.cooking_gemini.cooking_recover_episodes import recover
         recovered = await asyncio.to_thread(recover, args, sample, spec, state)
         if recovered is not None:
             if episode_cache is not None:

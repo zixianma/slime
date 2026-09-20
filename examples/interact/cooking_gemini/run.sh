@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/../qwen35_env.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../models/qwen35/qwen35_env.sh"
 cd "$INTERACT_REPO"
 source scripts/models/qwen3.5-4B.sh
 MODEL_ARGS[1]=slime_plugins.models.qwen3_5_vl

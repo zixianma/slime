@@ -1,0 +1,1 @@
+"""Shared interaction-pipeline utilities."""

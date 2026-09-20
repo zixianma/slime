@@ -154,7 +154,7 @@ def run(spec, assistant):
                         raise RuntimeError(f"Hardware cooking renderer failed: {backend}")
                     expected = os.environ.get('INTERACT_RENDER_GPU_UUID')
                     if expected and not self.placement_checked:
-                        from examples.interact.cooking_gpu_handoff import graphics_processes
+                        from examples.interact.cooking_gemini.cooking_gpu_handoff import graphics_processes
                         cdp = browser.new_browser_cdp_session()
                         processes = cdp.send('SystemInfo.getProcessInfo')['processInfo']
                         cdp.detach()

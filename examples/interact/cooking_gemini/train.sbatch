@@ -15,7 +15,7 @@ set -euo pipefail
 
 repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 cd "$repo"
-source examples/interact/qwen35_env.sh
+source examples/interact/models/qwen35/qwen35_env.sh
 
 : "${COOKING_GEMINI_SPLIT:?set COOKING_GEMINI_SPLIT to the generated split directory}"
 : "${COOKING_GEMINI_RUN_DIR:?set COOKING_GEMINI_RUN_DIR to a new durable run directory}"
@@ -65,7 +65,7 @@ else
   unset INTERACT_WANDB_RUN_PATH
 fi
 
-timeout --signal=TERM --kill-after=30s 420s python examples/interact/cooking_render_preflight.py
+timeout --signal=TERM --kill-after=30s 420s python examples/interact/cooking_gemini/cooking_render_preflight.py
 export COOKING_RENDER_GPU
 COOKING_RENDER_GPU=$(python -c 'import json,os,pathlib; p=pathlib.Path(os.environ["COOKING_RUN_DIR"])/("preflight-"+os.environ["SLURM_JOB_ID"])/"selected.json"; print(json.loads(p.read_text())["renderer_gpu"])')
 export INTERACT_RENDER_GPU_UUID
@@ -85,7 +85,7 @@ else
   echo "COOKING_TOPOLOGY dedicated-renderer-fallback layout=$layout"
 fi
 
-python examples/interact/with_wandb_env.py \
+python examples/interact/tracking/with_wandb_env.py \
   --env-file "$WANDB_ENV_FILE" --provider-env-file "$PROVIDER_ENV_FILE" -- \
   bash examples/interact/cooking_gemini/run.sh \
   --rollout-num-gpus 4 --sglang-config "$layout" \

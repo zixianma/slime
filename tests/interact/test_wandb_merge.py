@@ -1,6 +1,6 @@
 import pytest
 
-from examples.interact.merge_qwen35_wandb import scalars, points, compare_histories
+from examples.interact.tracking.merge_qwen35_wandb import scalars, points, compare_histories
 
 
 def test_preserves_zero_and_removes_internal_metadata_and_unrelated_fields():

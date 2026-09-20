@@ -2,7 +2,7 @@ from types import SimpleNamespace
 import json
 from pathlib import Path
 import pytest
-from examples.interact.cooking_calibration_metrics import summarize
+from examples.interact.archive.cooking_calibration.cooking_calibration_metrics import summarize
 
 
 def sample(ep, group, turn, total, reward):
@@ -26,7 +26,7 @@ def test_success_is_episode_weighted_and_variance_is_within_group():
 
 
 def test_full_reward_tiebreak_preserves_success_priority_and_adds_variance():
-    from examples.interact.cooking_full_metrics import lexicographic_reward
+    from examples.interact.archive.cooking_calibration.cooking_full_metrics import lexicographic_reward
     def reward(success, detected, planned, false_flags):
         return lexicographic_reward(dict(task_success=success, detected_errors=detected,
                                          errors_planned=planned, false_flags=false_flags))
@@ -52,8 +52,8 @@ def test_frozen_split_and_calibration_subset():
 
 
 def test_rerun_preserves_membership_and_versions_only_budget(tmp_path):
-    from examples.interact.prepare_cooking_rl import prepare
-    from examples.interact.cooking_calibration_budget import validate_profile
+    from examples.interact.cooking_gemini.prepare_cooking_rl import prepare
+    from examples.interact.archive.cooking_calibration.cooking_calibration_budget import validate_profile
     old, new = tmp_path/'old', tmp_path/'new'
     prepare(old)
     prepare(new, extended_budget=True)
@@ -71,18 +71,18 @@ def test_rerun_preserves_membership_and_versions_only_budget(tmp_path):
 
 
 def test_prepared_allocation_reserves_downstream_stages():
-    from examples.interact.cooking_calibration_budget import ALLOCATION_SECONDS, CLEANUP_SECONDS, STAGE_LIMITS, stage_deadline
+    from examples.interact.archive.cooking_calibration.cooking_calibration_budget import ALLOCATION_SECONDS, CLEANUP_SECONDS, STAGE_LIMITS, stage_deadline
     assert sum(STAGE_LIMITS) + CLEANUP_SECONDS <= ALLOCATION_SECONDS
-    script = (Path(__file__).resolve().parents[2]/'examples/interact/cooking_qwen35_calibration.sbatch').read_text()
+    script = (Path(__file__).resolve().parents[2]/'examples/interact/archive/cooking_calibration/cooking_qwen35_calibration.sbatch').read_text()
     assert '#SBATCH --time=07:00:00' in script
     assert stage_deadline(1000, 100, 950, [100, 50]) == 850
     assert stage_deadline(1000, 100, 200, [100, 50]) == 300
 
 
 def test_four_gpu_launcher_uses_all_gpus_for_data_parallel_learning(monkeypatch):
-    from examples.interact.cooking_full_training import assert_learner_topology
+    from examples.interact.archive.cooking_calibration.cooking_full_training import assert_learner_topology
     root = Path(__file__).resolve().parents[2]
-    script = (root/'examples/interact/cooking_full4.sbatch').read_text()
+    script = (root/'examples/interact/archive/cooking_calibration/cooking_full4.sbatch').read_text()
     assert '--actor-num-gpus-per-node 4' in script
     assert '--tensor-model-parallel-size 1' in script
     monkeypatch.setenv('COOKING_EXPECTED_ACTOR_GPUS', '4')

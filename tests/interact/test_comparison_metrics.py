@@ -1,4 +1,4 @@
-from examples.interact.comparison_metrics import format_metrics,summarize
+from examples.interact.tools.comparison.comparison_metrics import format_metrics,summarize
 
 
 def test_format_metrics():
@@ -31,7 +31,7 @@ def test_failed_episodes_not_zero_reward():
 def test_report_intervals_and_duplicate_guard(tmp_path):
     import json
     import pytest
-    from examples.interact.report_comparison import read_records,wilson
+    from examples.interact.tools.comparison.report_comparison import read_records,wilson
     low,high=wilson(0,16)
     assert low<1e-12 and high>0.15
     assert wilson(0,0) is None

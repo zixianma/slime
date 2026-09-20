@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from examples.interact import wandb_resume as resume
+from examples.interact.tracking import wandb_resume as resume
 from slime.observability import wandb_utils
 
 
@@ -181,7 +181,7 @@ def test_single_writer_actor_serializes_metrics(args, monkeypatch):
 
 
 def test_credential_wrapper_preserves_explicit_interact_destination(tmp_path):
-    from examples.interact.with_wandb_env import build_environment
+    from examples.interact.tracking.with_wandb_env import build_environment
     dotenv = tmp_path / "test.env"
     dotenv.write_text("WANDB_API_KEY=fake-test-key\nWANDB_RUN_ID=unrelated\n")
     env = build_environment(dotenv, {"INTERACT_WANDB_RUN_PATH": resume.CANONICAL_PATH})

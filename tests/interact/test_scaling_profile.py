@@ -1,5 +1,5 @@
 import json
-from examples.interact.report_scaling import summarize
+from examples.interact.tools.profiling.report_scaling import summarize
 
 
 def test_partial_progress_counts_only_completed_turns(tmp_path):
@@ -17,7 +17,7 @@ def test_partial_progress_counts_only_completed_turns(tmp_path):
 
 def test_manifest_has_same_work_and_resource_mapping():
     from pathlib import Path
-    from examples.interact.profile_scaling import server_command
+    from examples.interact.tools.profiling.profile_scaling import server_command
     root = Path(__file__).resolve().parents[2]
     manifest = json.loads((root/'examples/interact/configs/scaling_profile_v1.json').read_text())
     assert manifest['concurrency'] == 8 and manifest['max_turns'] == 16
@@ -30,7 +30,7 @@ def test_manifest_has_same_work_and_resource_mapping():
 
 
 def test_request_limit_is_only_server_change():
-    from examples.interact.profile_scaling import server_command
+    from examples.interact.tools.profiling.profile_scaling import server_command
     before = server_command(8000, 0)
     after = server_command(8000, 0, max_running_requests=8)
     index = before.index('--max-running-requests')+1

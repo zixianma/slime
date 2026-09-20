@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-path = Path(__file__).resolve().parents[2] / "examples/interact/with_wandb_env.py"
+path = Path(__file__).resolve().parents[2] / "examples/interact/tracking/with_wandb_env.py"
 spec = importlib.util.spec_from_file_location("with_wandb_env", path)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)

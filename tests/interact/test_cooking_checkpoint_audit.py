@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 import pytest
-from examples.interact.cooking_checkpoint_audit import verify
+from examples.interact.archive.cooking_calibration.cooking_checkpoint_audit import verify
 
 
 @pytest.mark.parametrize('matching', [True, False])

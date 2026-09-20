@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from examples.interact.qwen35_metrics import summarize
+from examples.interact.models.qwen35.qwen35_metrics import summarize
 
 
 def test_macro_and_episode_metrics_do_not_weight_turns():

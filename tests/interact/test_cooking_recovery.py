@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 from interact_env.protocol import EpisodeSpec, Observation
-from examples.interact.cooking_recover_episodes import recover, digest, manifest
+from examples.interact.cooking_gemini.cooking_recover_episodes import recover, digest, manifest
 from slime.utils.multimodal_storage import materialize_multimodal
 
 

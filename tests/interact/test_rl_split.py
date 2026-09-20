@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from examples.interact.prepare_rl_split import OLD_VALIDATION, build_split, prompt_rows
+from examples.interact.screensim.prepare_rl_split import OLD_VALIDATION, build_split, prompt_rows
 
 
 def source_manifest():

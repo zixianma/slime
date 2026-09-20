@@ -19,7 +19,7 @@ def test_handoff_launcher_is_path_and_identity_explicit():
 
 
 def test_handoff_docs_identify_paid_stochastic_user_and_resume_contract():
-    text = (ROOT / "examples/interact/COOKING_GEMINI_HANDOFF.md").read_text()
+    text = (ROOT / "examples/interact/docs/COOKING_GEMINI_HANDOFF.md").read_text()
     assert "paid, stochastic API calls" in text
     assert "first four valid completions" in text
     assert "COOKING_GEMINI_LOAD" in text

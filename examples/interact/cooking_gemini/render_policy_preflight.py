@@ -10,8 +10,8 @@ import time
 
 import httpx
 
-from examples.interact.cooking_render_probe import run_probe
-from examples.interact.profile_scaling import server_command
+from examples.interact.cooking_gemini.cooking_render_probe import run_probe
+from examples.interact.tools.profiling.profile_scaling import server_command
 
 
 def terminate(process):

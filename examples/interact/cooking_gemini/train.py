@@ -96,7 +96,7 @@ def main():
     if os.environ.get("INTERACT_PARSE_ONLY") == "1":
         print("COOKING_GEMINI_ARGS_OK", args.interact_training_plan, flush=True)
         return
-    from examples.interact.wandb_resume import configure_tracking
+    from examples.interact.tracking.wandb_resume import configure_tracking
     configure_tracking(args, os.environ)
     import ray
     from train import train

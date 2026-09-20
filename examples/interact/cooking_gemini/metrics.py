@@ -71,7 +71,7 @@ def log_rollout(rollout_id, args, samples, *unused):
     assert values["train/episodes"] == 24 and values["train/groups"] == 6
     values.update({"train/step": rollout_id + 1, "train/rollout_policy_update": rollout_id})
     if os.environ.get("COOKING_BIND_RENDER_WORKERS") == "1":
-        from examples.interact.cooking_gpu_handoff import assert_no_graphics
+        from examples.interact.cooking_gemini.cooking_gpu_handoff import assert_no_graphics
         handoff = assert_no_graphics()
         (Path(os.environ["INTERACT_JOB_DIR"]) / f"renderer-handoff-{rollout_id + 1}.json").write_text(
             json.dumps(handoff) + "\n")

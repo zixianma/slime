@@ -1,5 +1,5 @@
 import pytest
-from examples.interact.cooking_training_plan import experiment, should_evaluate
+from examples.interact.archive.cooking_calibration.cooking_training_plan import experiment, should_evaluate
 
 
 def test_sparse_validation_uses_completed_update_count():

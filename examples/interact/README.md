@@ -8,14 +8,14 @@ This is the active implementation, based directly on official
 The checkout is `/gpfs/home/zixianma/interact/slime` and the public fork is
 [zixianma/slime](https://github.com/zixianma/slime). Targeted Slime changes support
 multimodal storage, Qwen VL models, resumable W&B logging, and safe weight-transfer
-reconnection. See [RUNBOOK.md](RUNBOOK.md) for operation and
-[PROGRESS.md](PROGRESS.md) for the concise verified status.
+reconnection. See [RUNBOOK.md](docs/RUNBOOK.md) for operation and
+[PROGRESS.md](docs/PROGRESS.md) for the concise verified status.
 
 The supported CookSim RL path now uses an engine-native
 `gemini-3.7-flash` novice user, single-error scenarios, a prevention/turn reward,
 straggler-tolerant rollouts, four H200s for both inference and TP2 x DP2 learning,
 and checkpoint/W&B-safe continuation. Start with
-[COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md); it is the authoritative
+[COOKING_GEMINI_HANDOFF.md](docs/COOKING_GEMINI_HANDOFF.md); it is the authoritative
 setup and collaborator handoff. Older cooking plan documents are historical.
 
 The sibling `slime-cooking/` OpenWebRL-based prototype is reference only, **not
@@ -32,7 +32,24 @@ SGLang trajectories completed through the official Slime hook, both with F1 zero
 Subsequent official Slime training completed two optimizer steps, including a
 nonzero-gradient update, checkpoint saving, weight synchronization and a separate
 checkpoint-resume run. This is a pipeline smoke test, not measured benchmark gain.
-See [GPU_VALIDATION.md](GPU_VALIDATION.md) for results, artifacts and limitations.
+See [GPU_VALIDATION.md](docs/GPU_VALIDATION.md) for results, artifacts and limitations.
+
+## Repository layout
+
+The handoff surface is intentionally small:
+
+- `cooking_gemini/`: supported CookSim Gemini-user RL pipeline;
+- `screensim/`: ScreenSim launchers and split/evaluation code;
+- `models/`: model-specific training and continuation code;
+- `tracking/`: W&B credentials, resume guards, and history tools;
+- `common/` and `runtime/`: engine-neutral helpers and environment setup;
+- `tools/`: comparison, profiling, and replay-site utilities;
+- `docs/`: current handoff/runbook/status documentation;
+- `archive/`: superseded experiments retained only for reproducibility;
+- `configs/`: centralized immutable runtime and scenario configurations.
+
+New production work belongs in an engine or model package, not in this directory
+root. The root contains only this index and installation/provenance metadata.
 
 | Layer | Shared responsibility | Engine-specific responsibility |
 | --- | --- | --- |
@@ -83,11 +100,11 @@ That is not a portable GPU-stack installation recipe.
 
 ```bash
 cd /gpfs/home/zixianma/interact/slime
-source examples/interact/env.sh
+source examples/interact/runtime/env.sh
 python -m pytest -q -o addopts='' tests/interact
 python -m interact_env.smoke --spec examples/interact/configs/cooking.json
 python -m interact_env.smoke --spec examples/interact/configs/cooking_frames.json --max-decisions 2
-python examples/interact/prepare.py \
+python examples/interact/common/prepare.py \
   --spec examples/interact/configs/cooking.json \
   --output interact-runs/prepared-cooking
 ```
@@ -210,7 +227,7 @@ per assistant turn. Metrics are split by engine and reward version. For example:
 gradient norms, learning rates, logprob differences and performance logging remain
 enabled. Optional components with missing values expose their sample counts.
 
-Completed stages can be backfilled with `examples/interact/backfill_wandb.py`.
+Completed stages can be backfilled with `examples/interact/tracking/backfill_wandb.py`.
 It rejects failed stages and incomplete episode histories, uses a fresh run ID,
 and writes only scalar metrics plus allowlisted provenance—not prompts, images,
 transcripts, checkpoint files, raw logs or credentials. Job 289525's three optimizer
@@ -264,8 +281,8 @@ exiting. These are **running comparisons, not final results**. For a read-only
 cross-model coverage and per-scenario confidence/contrast report:
 
 ```bash
-source examples/interact/env.sh
-python examples/interact/report_comparison.py --job-dir \
+source examples/interact/runtime/env.sh
+python examples/interact/tools/comparison/report_comparison.py --job-dir \
   /gpfs/scrubbed/zixianma/checkpoints/web/screensim-qwen-comparison/job-292136
 ```
 
