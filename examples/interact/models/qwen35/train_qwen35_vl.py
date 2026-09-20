@@ -11,12 +11,19 @@ sys.path.insert(0, str(ROOT))
 from slime.utils.arguments import parse_args
 
 args = parse_args()
-split = Path('/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-v2-18train-12val/manifest.json')
+split_root = Path(os.environ.get(
+    "Q35_SPLIT", "/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-v2-18train-12val"
+))
+split = split_root / "manifest.json"
 raw = split.read_bytes()
 args.interact_split_version = json.loads(raw)['split_version']
 args.interact_split_sha256 = hashlib.sha256(raw).hexdigest()
-assert args.interact_split_sha256 == 'a29464102278d784a06a6b5a57ab6cb3dd53b2da6a74015bab54f8687a3d96f9'
-args.interact_model_revision = '851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a'
+expected_split = os.environ.get("Q35_EXPECTED_SPLIT_SHA256")
+if expected_split and args.interact_split_sha256 != expected_split:
+    raise ValueError("Q35 split manifest hash mismatch")
+args.interact_model_revision = os.environ.get(
+    "Q35_MODEL_REVISION", "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+)
 if os.environ.get('INTERACT_PARENT_WANDB_RUN'):
     args.interact_parent_wandb_run = os.environ['INTERACT_PARENT_WANDB_RUN']
     args.interact_parent_checkpoint = args.load
@@ -31,7 +38,8 @@ else:
         raise SystemExit(128 + signum)
     signal.signal(signal.SIGTERM, interrupted)
     try:
-        ray.init(address='local', num_cpus=16, num_gpus=2,
+        ray.init(address='local', num_cpus=int(os.environ.get("Q35_CPUS", "16")),
+                 num_gpus=int(os.environ.get("Q35_NUM_GPUS", "2")),
                  object_store_memory=4 * 1024**3, include_dashboard=False)
         train(args)
     finally:

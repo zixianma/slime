@@ -58,3 +58,23 @@ def test_native_intime_success_profile(tmp_path, monkeypatch):
     oracle = run_native(spec, control="oracle")
     assert score(silent, spec.config["reward_version"]) == 0
     assert score(oracle, spec.config["reward_version"]) == 1
+
+
+def test_native_gemini_human_uses_free_v3_person_grader_without_api(tmp_path, monkeypatch):
+    import screensim.interact.agents as agents
+
+    class FakeHumanClient:
+        def text(self, *args, **kwargs):
+            return json.dumps({"utterance": "", "move": "answer", "close_conversation": True,
+                               "done": True, "plan_update": {"op": "drop", "actions": []},
+                               "assistant_error_call": "none", "call_about": "", "think": ""})
+
+    monkeypatch.setattr(agents, "make_client", lambda model: FakeHumanClient())
+    monkeypatch.chdir(tmp_path)
+    report = run_native(EpisodeSpec("screensim", "lost_phone_lockdown", config={
+        "human": "gemini", "human_model": "gemini-3.7-flash",
+        "observation": "relational", "max_turns": 2}), control="silent")
+    assert report["adapter_profile"] == "plan_human_v3:gemini-3.7-flash"
+    assert report["human_model"] == "gemini-3.7-flash"
+    assert report["human_mode"] == "free"
+    assert report["grader"] == "person"

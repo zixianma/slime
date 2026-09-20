@@ -82,11 +82,18 @@ def configure_tracking(args, env, api=None):
     args.interact_resume_completed_updates = completed
     eval_steps = set(points(rows, "eval/success", "eval/step"))
     boundary_eval_step = completed - 1
+    # CookSim records the evaluated rollout ID; ScreenSim records the number of
+    # completed updates. Both replay the same boundary rollout after preemption.
+    expected_eval_axis = (
+        boundary_eval_step
+        if getattr(args, "interact_engine", None) == "cooking"
+        else completed
+    )
     args.interact_resume_eval_step = (
         boundary_eval_step
-        if (getattr(args, "interact_engine", None) == "cooking"
-            and args.eval_interval and completed % args.eval_interval == 0
-            and boundary_eval_step not in eval_steps)
+        if (getattr(args, "eval_interval", None)
+            and completed % args.eval_interval == 0
+            and expected_eval_axis not in eval_steps)
         else None
     )
     args.interact_tracking_receipt = str(Path(args.save) / "wandb_run.json")

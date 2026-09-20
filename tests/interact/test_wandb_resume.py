@@ -77,6 +77,29 @@ def test_cooking_resume_replays_missing_boundary_eval(args):
     assert args.interact_resume_eval_step is None
 
 
+def test_screensim_resume_replays_missing_boundary_eval(args):
+    from pathlib import Path
+    load = Path(args.load)
+    (load / "latest_checkpointed_iteration.txt").write_text("2")
+    (load / "iter_0000002").mkdir()
+    (load / "iter_0000002" / ".metadata").touch()
+    args.interact_engine = "screensim"
+    args.eval_interval = 3
+    rows = [
+        {"train/step": i, "train/grad_norm": .5, "train/success": .6,
+         "rollout/step": i}
+        for i in range(3)
+    ] + [{"eval/step": 0, "eval/success": .65}]
+    resume.configure_tracking(args, {}, fake_api(args, rows))
+    assert args.interact_resume_completed_updates == 3
+    assert args.interact_resume_eval_step == 2
+
+    rows.append({"eval/step": 3, "eval/success": .8})
+    args.wandb_run_id = None
+    resume.configure_tracking(args, {}, fake_api(args, rows))
+    assert args.interact_resume_eval_step is None
+
+
 def test_parent_receipt_is_reused_and_explicit_destination_wins(args):
     from pathlib import Path
     (Path(args.load) / "wandb_run.json").write_text(json.dumps(

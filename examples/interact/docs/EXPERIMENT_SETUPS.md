@@ -38,7 +38,7 @@ is one stochastic policy attempt within that group.
 - Policy/learner: Qwen3.5-4B, frozen vision tower, GRPO, global batch 48, LR
   `5e-7`; four-GPU learner topology is TP=2 x DP=2.
 
-## Proposed ScreenSim Gemini-human run
+## ScreenSim Gemini-human run
 
 - Engine source: upstream `hellomuffin/screensim-engine` at `869d8e9`; this has
   v3 grading, stricter success, and revised task/persona behavior.
@@ -50,6 +50,10 @@ is one stochastic policy attempt within that group.
 - Gemini generation is stochastic and has no fixed replay seed in this setup;
   validation therefore measures the joint policy/user interaction with more
   variance than scripted-human validation.
+- Train/eval split: 18/12 scenarios. One update is six groups x eight attempts;
+  validation is 12 groups x four attempts at updates 0, 3, 6, 9, and 12.
+- The earlier job `299664` completed only a two-episode, one-update smoke test
+  with zero successes and no validation. The first full curve is a separate run.
 
 ## CookSim Gemini-human single-error run (current)
 

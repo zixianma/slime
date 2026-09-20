@@ -17,6 +17,8 @@ This directory is the maintained CookSim training implementation:
   Gemini-user split builders;
 - `validate_reward.py` — retrospective reward-ranking audit utility.
 
-Read [the complete handoff](../docs/COOKING_GEMINI_HANDOFF.md) before running it.
+Start with the [concise reproduction guide](../docs/COOKING_GEMINI_REPRO.md),
+then use [the complete handoff](../docs/COOKING_GEMINI_HANDOFF.md) for operations
+and interpretation.
 Older cooking scripts under `../archive/cooking_calibration/` are historical
 scripted-user/calibration paths and are not interchangeable with this setup.
