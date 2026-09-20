@@ -87,6 +87,15 @@ if [[ -n "${SCREENSIM_GEMINI_LOAD:-}" ]]; then
     echo "SCREENSIM_LAUNCH_ERROR resume checkpoint marker is missing" >&2
     exit 1
   fi
+  checkpoint_index=$(<"$SCREENSIM_GEMINI_LOAD/latest_checkpointed_iteration.txt")
+  if [[ ! "$checkpoint_index" =~ ^[0-9]+$ ]]; then
+    echo "SCREENSIM_LAUNCH_ERROR invalid checkpoint marker" >&2
+    exit 1
+  fi
+  if (( checkpoint_index + 1 >= Q35_NUM_ROLLOUT )); then
+    echo "SCREENSIM_TARGET_COMPLETE completed_updates=$((checkpoint_index + 1)) target=$Q35_NUM_ROLLOUT"
+    exit 0
+  fi
   resume_args=(--load "$SCREENSIM_GEMINI_LOAD" --use-checkpoint-opt-param-scheduler --skip-eval-before-train)
 else
   unset INTERACT_WANDB_RUN_PATH
