@@ -2,7 +2,6 @@ import json
 import sys
 from types import SimpleNamespace
 from examples.interact.archive.cooking_calibration.cooking_full_training import train, configure, BudgetPause
-from examples.interact.archive.cooking_calibration.cooking_training_plan import SPLIT
 import pytest
 
 
@@ -50,27 +49,36 @@ def test_full_loop_sparse_eval_and_checkpoints(tmp_path, monkeypatch, defer_base
     assert len(updates) == 12 and evals == expected_evals
 
 
-def config_args(root):
+def prepared_split(root):
+    from examples.interact.cooking_gemini.prepare_cooking_rl import prepare
+
+    split = root / "split"
+    prepare(split, extended_budget=True)
+    return split
+
+
+def config_args(root, split):
     return SimpleNamespace(num_rollout=12, rollout_batch_size=6, n_samples_per_prompt=8,
         global_batch_size=48,n_samples_per_eval_prompt=4,rollout_global_dataset=True,
-        offload_train=True,offload_rollout=True,prompt_data=str(SPLIT/'train.jsonl'),
-        eval_prompt_data=['cooking',str(SPLIT/'validation.jsonl')],save=str(root/'checkpoints'),
+        offload_train=True,offload_rollout=True,prompt_data=str(split/'train.jsonl'),
+        eval_prompt_data=['cooking',str(split/'validation.jsonl')],save=str(root/'checkpoints'),
         wandb_team='zixianma',wandb_project='interact-slime-rl',interact_human_profile={})
 
 
 def test_resume_reuses_identity_and_rejects_uncommitted_checkpoint(tmp_path, monkeypatch):
     monkeypatch.setenv('COOKING_RUN_DIR', str(tmp_path))
-    args = config_args(tmp_path)
-    configure(args,SPLIT)
+    split = prepared_split(tmp_path)
+    args = config_args(tmp_path, split)
+    configure(args, split)
     receipt = tmp_path/'checkpoints/wandb_run.json'
     receipt.parent.mkdir()
     receipt.write_text(json.dumps({'entity':'zixianma','project':'interact-slime-rl','run_id':'cooking-test'}))
-    resumed = config_args(tmp_path)
-    configure(resumed,SPLIT)
+    resumed = config_args(tmp_path, split)
+    configure(resumed, split)
     assert resumed.wandb_run_id == 'cooking-test' and resumed.interact_tracking_receipt is None
     (receipt.parent/'latest_checkpointed_iteration.txt').write_text('0')
     with pytest.raises(AssertionError, match='uncommitted'):
-        configure(config_args(tmp_path),SPLIT)
+        configure(config_args(tmp_path, split), split)
 
 
 def test_committed_resume_preserves_policy_version_and_sampler(tmp_path, monkeypatch):
@@ -87,10 +95,11 @@ def test_committed_resume_preserves_policy_version_and_sampler(tmp_path, monkeyp
         dict(entity='zixianma', project='interact-slime-rl', run_id='same-cooking-run')))
     (tmp_path/'resume-state.json').write_text(json.dumps(
         dict(completed_updates=1, evaluated_updates=[])))
-    args = config_args(tmp_path)
+    split = prepared_split(tmp_path)
+    args = config_args(tmp_path, split)
     args.finetune = args.no_load_optim = args.no_load_rng = True
     args.start_rollout_id = 0
-    configure(args, SPLIT)
+    configure(args, split)
     assert args.load == args.save and args.use_checkpoint_opt_param_scheduler
     assert not args.finetune and not args.no_load_optim and not args.no_load_rng
     assert args.start_rollout_id == 1

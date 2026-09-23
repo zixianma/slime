@@ -8,8 +8,12 @@ def test_sparse_validation_uses_completed_update_count():
         should_evaluate(13)
 
 
-def test_full_experiment_not_calibration():
-    plan = experiment()
+def test_full_experiment_not_calibration(tmp_path):
+    from examples.interact.cooking_gemini.prepare_cooking_rl import prepare
+
+    split = tmp_path / "split"
+    prepare(split, extended_budget=True)
+    plan = experiment(split)
     assert plan['train_scenarios'] == 40
     assert plan['validation_scenarios'] == 10
     assert plan['global_batch_episodes'] == 48

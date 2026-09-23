@@ -41,8 +41,11 @@ def test_incomplete_trajectories_rejected():
         summarize([sample('b',0,0,2,0)],'train')
 
 
-def test_frozen_split_and_calibration_subset():
-    root=Path(__file__).resolve().parents[2]/'interact-runs/cooking-rl-v1-20260914'
+def test_frozen_split_and_calibration_subset(tmp_path):
+    from examples.interact.cooking_gemini.prepare_cooking_rl import prepare
+
+    root = tmp_path / "split"
+    prepare(root)
     manifest=json.loads((root/'manifest.json').read_text())
     a,b,c=[set(manifest['files'][k]['scenarios']) for k in ['train','validation','calibration_validation']]
     assert (len(a),len(b),len(c))==(40,10,4)

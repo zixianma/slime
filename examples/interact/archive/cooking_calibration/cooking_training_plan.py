@@ -18,7 +18,8 @@ def should_evaluate(completed_updates):
     return completed_updates in EVAL_UPDATES
 
 
-def validate_split(split=SPLIT):
+def validate_split(split=None):
+    split = split or SPLIT
     manifest = json.loads((split/'manifest.json').read_text())
     members = {}
     for name, count in (('train', 40), ('validation', 10)):
@@ -36,8 +37,8 @@ def validate_split(split=SPLIT):
     return manifest
 
 
-def experiment():
-    manifest = validate_split()
+def experiment(split=None):
+    manifest = validate_split(split)
     return dict(
         version='cooking-full-12-eval3-v1', target_updates=TARGET_UPDATES,
         eval_completed_updates=list(EVAL_UPDATES), checkpoint_every_updates=1,

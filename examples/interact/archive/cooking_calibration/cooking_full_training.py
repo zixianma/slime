@@ -56,7 +56,7 @@ def configure(args, split):
     assert Path(args.prompt_data).resolve() == (split/'train.jsonl').resolve()
     assert len(args.eval_prompt_data) == 2 and Path(args.eval_prompt_data[1]).resolve() == (split/'validation.jsonl').resolve()
     root = Path(os.environ['COOKING_RUN_DIR'])
-    contract = experiment()
+    contract = experiment(split)
     contract_path = root/'experiment.json'
     if contract_path.exists():
         previous_contract = json.loads(contract_path.read_text())
