@@ -41,7 +41,9 @@ report, while Slime trains a local Qwen3.5-4B assistant with GRPO.
 The first run of this exact profile improved 20-episode validation success from
 13/20 (65%) at update 0 to 16/20 (80%) at update 3; reward increased from 0.606
 to 0.772. This is promising development evidence, not a significance claim or a
-final result. The run was still active when this handoff was written.
+final result. For current checkpoint-wide evidence, use
+[the full-suite evaluation guide](FULL_SUITE_EVAL.md); the published update-12
+CookSim export is explicitly marked partial at 149/150 scenarios.
 
 ## Prerequisites
 

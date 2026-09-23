@@ -52,8 +52,12 @@ is one stochastic policy attempt within that group.
   variance than scripted-human validation.
 - Train/eval split: 18/12 scenarios. One update is six groups x eight attempts;
   validation is 12 groups x four attempts at updates 0, 3, 6, 9, and 12.
+- The split manifest records the selected persona and any engine worktree patch
+  hash. Baseline and `classic_novice` personas are separate experiment
+  distributions and must not share a W&B curve.
 - The earlier job `299664` completed only a two-episode, one-update smoke test
-  with zero successes and no validation. The first full curve is a separate run.
+  with zero successes and no validation. A separate baseline-persona run reached
+  update 12 and has a complete 30-scenario update-0/update-12 evaluation.
 
 ## CookSim Gemini-human single-error run (current)
 

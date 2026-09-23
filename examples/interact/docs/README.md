@@ -7,6 +7,8 @@
 - [`COOKING_GEMINI_HANDOFF.md`](COOKING_GEMINI_HANDOFF.md): collaborator setup
   and detailed CookSim operations.
 - [`RUNBOOK.md`](RUNBOOK.md): operational invariants and failure handling.
+- [`FULL_SUITE_EVAL.md`](FULL_SUITE_EVAL.md): complete train/validation
+  checkpoint evaluation and replay generation.
 - [`PROGRESS.md`](PROGRESS.md): concise verified experiment status.
 - [`EXPERIMENT_SETUPS.md`](EXPERIMENT_SETUPS.md): frozen ScreenSim/CookSim setup
   definitions.

@@ -9,8 +9,9 @@ clock, grading, and artifacts remain inside the engine.
 
 | Goal | Guide | Status |
 | --- | --- | --- |
-| Reproduce ScreenSim + Gemini-user RL | [ScreenSim Gemini reproduction](docs/SCREENSIM_GEMINI_REPRO.md) | Supported; full update-12 experiment in progress |
+| Reproduce ScreenSim + Gemini-user RL | [ScreenSim Gemini reproduction](docs/SCREENSIM_GEMINI_REPRO.md) | Supported; update-12 run and matched full-suite evaluation complete |
 | Reproduce CookSim + Gemini-user RL | [CookSim Gemini reproduction](docs/COOKING_GEMINI_REPRO.md) | Supported and validated through checkpoint continuation |
+| Compare complete checkpoint suites | [Full-suite evaluation](docs/FULL_SUITE_EVAL.md) | Supported for ScreenSim and CookSim |
 | Operate or recover a run | [Runbook](docs/RUNBOOK.md) | Supported |
 | Inspect frozen experiment definitions | [Experiment setups](docs/EXPERIMENT_SETUPS.md) | Current |
 | Review verified evidence | [Progress](docs/PROGRESS.md) and [GPU validation](docs/GPU_VALIDATION.md) | Current |
@@ -27,6 +28,8 @@ policy/user distribution.
 - `common/` and `runtime/`: shared preparation and runtime helpers.
 - `configs/`: centralized engine and GPU-layout configurations.
 - `tools/`: profiling, comparison, and rollout visualization.
+- `evaluation/`: hashed full-suite data, generic checkpoint resolution, and
+  eval-only launchers.
 - `docs/`: current operational records; `docs/history/` is not launchable.
 - `archive/`: superseded calibration experiments retained for provenance.
 

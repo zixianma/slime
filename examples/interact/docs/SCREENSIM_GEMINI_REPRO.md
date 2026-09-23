@@ -27,11 +27,14 @@ source examples/interact/models/qwen35/qwen35_env.sh
 python examples/interact/screensim/prepare_gemini_split.py \
   --source /durable/data/screensim-rl-v2/manifest.json \
   --engine-root ../screensim-engine \
+  --persona baseline \
   --output-dir /durable/data/screensim-gemini-18train-12val
 ```
 
 The builder recertifies every composite against the checked-out engine and
-records the source hash, exact engine revision, human profile, and split counts.
+records the source hash, exact engine revision and worktree patch hash, persona,
+human profile, and split counts. Use `--persona classic_novice` for that
+separate user distribution and keep it on its own W&B run.
 
 ## 3. Validate code and data handling
 
@@ -91,6 +94,12 @@ of completed updates: 0, 3, 6, 9, and 12. Because Gemini and policy sampling are
 stochastic, compare all 48 validation episodes and confidence intervals rather
 than interpreting one trajectory.
 
-The only experiment predating this guide was job `299664`: one update, two
-failed training episodes, and no validation. It is a pipeline smoke test, not a
-baseline learning curve.
+For a one-rollout pass over all 18 training and 12 validation scenarios, follow
+[the full-suite evaluation guide](FULL_SUITE_EVAL.md). The baseline-persona
+update-0/update-12 pass measured overall success **9/30 to 11/30**, training
+success **5/18 to 8/18**, and validation success **4/12 to 3/12**. The paired
+trajectories are available in the
+[public replay](https://zixianma.github.io/interact-rl-replays/screensim-gemini-u0-vs-u12/).
+
+Job `299664` predates this guide: one update, two failed training episodes, and
+no validation. It remains a pipeline smoke test rather than a baseline curve.

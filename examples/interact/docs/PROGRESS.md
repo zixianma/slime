@@ -1,11 +1,11 @@
 # Unified assistant RL progress
 
-Status snapshot: 2026-09-19 23:30 PDT.
+Status snapshot: 2026-09-22 PDT.
 
 | Engine | Native adapter | RL status |
 | --- | --- | --- |
 | ScreenSim | implemented | Qwen3.5-4B, 15 updates complete |
-| CookBench | implemented | Gemini-user Qwen3.5-4B run active; 6 updates checkpointed, update-6 validation active |
+| CookBench | implemented | Gemini-user Qwen3.5-4B continuation and full-suite evaluation tooling validated |
 | VH Streaming | planned | pending Unity lease integration |
 
 ## CookSim Gemini-user run
@@ -24,10 +24,10 @@ Update 3 also had 5.05 false flags per episode, 5% wrong serves, no burns, and a
 3.8% invalid-response fraction. The improvement is encouraging but not yet
 reliable: the user and policy are stochastic and validation has only 20 attempts.
 
-The active experiment is tracked at
+The original experiment is tracked at
 <https://wandb.ai/zixianma/interact-slime-rl/runs/kv1kjbup>. This table is a
-snapshot, not the final update-9 result. The operational setup—not the live job
-IDs or site paths—is captured in
+training-curve snapshot rather than a final full-suite result. The operational
+setup is captured in
 [COOKING_GEMINI_HANDOFF.md](COOKING_GEMINI_HANDOFF.md).
 
 Verified pipeline properties:
@@ -60,3 +60,22 @@ vision tower remained frozen.
 These are repeated fixed validation attempts, not a statistical significance
 claim. The canonical W&B run is
 <https://wandb.ai/zixianma/interact-slime-rl/runs/d0df345ba8f8>.
+
+## Matched full-suite checkpoint evidence
+
+The baseline-persona ScreenSim update-0/update-12 comparison covers each frozen
+scenario once at each checkpoint:
+
+| Split | Update 0 | Update 12 |
+| --- | ---: | ---: |
+| Train | 5/18 (27.8%) | 8/18 (44.4%) |
+| Validation | 4/12 (33.3%) | 3/12 (25.0%) |
+| Overall | 9/30 (30.0%) | 11/30 (36.7%) |
+
+This is broad paired evidence with one stochastic rollout per scenario. See the
+[evaluation protocol](FULL_SUITE_EVAL.md) and
+[public ScreenSim replay](https://zixianma.github.io/interact-rl-replays/screensim-gemini-u0-vs-u12/).
+
+The CookSim full-suite baseline contains all 150 scenarios. Its currently
+published update-12 export contains 149/150 and remains labeled partial; it must
+not be reported as a complete aggregate.

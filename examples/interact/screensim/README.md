@@ -11,3 +11,5 @@ CookSim W&B run identities.
 For the supported engine-native Gemini-user experiment, follow the
 [step-by-step reproduction guide](../docs/SCREENSIM_GEMINI_REPRO.md). The
 `gemini_train.sbatch` launcher supports both fresh and checkpoint-resumed runs.
+For one-rollout coverage of every frozen train and validation scenario, use the
+[full-suite evaluation guide](../docs/FULL_SUITE_EVAL.md).
