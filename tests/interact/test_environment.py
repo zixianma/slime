@@ -191,6 +191,16 @@ def test_real_frames_and_official_processor(tmp_path):
     assert ids.count(tokenizer.convert_tokens_to_ids("<|image_pad|>")) == int(grid.prod(dim=1).sum()) // 4
 
 
+def test_generated_multimodal_control_tokens_are_neutralized():
+    from interact_env.slime_bridge.generate import sanitize_observation_text
+
+    text = 'previous output: {"sub<|video_pad|>_completed": [], "x": "<|image_pad|>"}'
+    sanitized = sanitize_observation_text(text)
+    assert "<|video_pad|>" not in sanitized
+    assert "<|image_pad|>" not in sanitized
+    assert "sub[generated video_pad token]_completed" in sanitized
+
+
 def test_cooking_reward_and_parser():
     from interact_env.adapters.cooking import parse_reply
     from interact_env.adapters.cooking_rewards import score

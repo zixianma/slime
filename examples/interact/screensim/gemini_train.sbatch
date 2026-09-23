@@ -13,7 +13,14 @@
 #SBATCH --output=screensim-gemini-%j.out
 set -euo pipefail
 
-repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
+# Slurm stages batch scripts under /var/spool, so BASH_SOURCE no longer points
+# into the checkout once the job starts. Prefer the submission directory and
+# retain the source-relative fallback for direct/local execution.
+if [[ -n "${SLURM_SUBMIT_DIR:-}" && -f "$SLURM_SUBMIT_DIR/examples/interact/models/qwen35/qwen35_env.sh" ]]; then
+  repo=$SLURM_SUBMIT_DIR
+else
+  repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
+fi
 cd "$repo"
 source examples/interact/models/qwen35/qwen35_env.sh
 
@@ -52,11 +59,15 @@ assert m["counts"]["train_scenarios"] == 18
 assert m["counts"]["validation_scenarios"] == 12
 assert m["human_mode"] == "free" and m["grader"] == "person"
 assert m["profile"] == "plan_human_v3:gemini-3.7-flash"
+persona = m.get("persona", "baseline")
 for scenario in m["scenarios"]:
     c = scenario["spec"]["config"]
     assert c["human"] == "gemini" and c["human_model"] == "gemini-3.7-flash"
+    assert c["persona"] == persona
 print(m["engine_revision"])
 print(hashlib.sha256(p.read_bytes()).hexdigest())
+print(persona)
+print(m.get("engine_worktree_diff_sha256") or "")
 PY
 )
 engine_revision=$(git -C "$SCREENSIM_ENGINE_ROOT" rev-parse HEAD)
@@ -64,6 +75,12 @@ if [[ "${split_metadata[0]}" != "$engine_revision" ]]; then
   echo "SCREENSIM_LAUNCH_ERROR engine revision differs from frozen split" >&2
   exit 1
 fi
+engine_diff_sha256=$(git -C "$SCREENSIM_ENGINE_ROOT" diff --binary HEAD | sha256sum | cut -d' ' -f1)
+if [[ -n "${split_metadata[3]}" && "${split_metadata[3]}" != "$engine_diff_sha256" ]]; then
+  echo "SCREENSIM_LAUNCH_ERROR engine worktree patch differs from frozen split" >&2
+  exit 1
+fi
+export SCREENSIM_PERSONA=${split_metadata[2]}
 
 export Q35_SPLIT=$SCREENSIM_GEMINI_SPLIT
 export Q35_TRAIN_DIR=$SCREENSIM_GEMINI_RUN_DIR
@@ -72,9 +89,12 @@ export Q35_NUM_GPUS=4 Q35_CPUS=32 Q35_NUM_ROLLOUT=${SCREENSIM_NUM_ROLLOUT:-12}
 export Q35_WANDB_TEAM=$SCREENSIM_WANDB_TEAM
 export Q35_WANDB_PROJECT=${SCREENSIM_WANDB_PROJECT:-interact-slime-rl}
 export INTERACT_WANDB_MODE=online INTERACT_ATTEMPT=${INTERACT_ATTEMPT:-gemini37-full}
+export Q35_WORKER_TIMEOUT=${SCREENSIM_WORKER_TIMEOUT:-600}
+export SCREENSIM_EPISODE_ATTEMPTS=${SCREENSIM_EPISODE_ATTEMPTS:-2}
+export INTERACT_JOB_DIR=$SCREENSIM_GEMINI_RUN_DIR/audit
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
 unset WANDB_RUN_ID WANDB_RESUME WANDB_SWEEP_ID
-mkdir -p "$SCREENSIM_GEMINI_RUN_DIR" interact-runs
+mkdir -p "$SCREENSIM_GEMINI_RUN_DIR" "$INTERACT_JOB_DIR" interact-runs
 
 if [[ "${SCREENSIM_PREFLIGHT_ONLY:-0}" == 1 ]]; then
   echo "SCREENSIM_PREFLIGHT_OK engine_revision=$engine_revision split_sha256=${split_metadata[1]}"
@@ -111,4 +131,5 @@ fi
 python examples/interact/tracking/with_wandb_env.py \
   --env-file "$WANDB_ENV_FILE" --provider-env-file "$PROVIDER_ENV_FILE" -- \
   bash examples/interact/models/qwen35/run_qwen35_train.sh \
-  "${resume_args[@]}" "${smoke_args[@]}"
+  "${resume_args[@]}" "${smoke_args[@]}" \
+  --custom-generate-function-path examples.interact.screensim.retry_generate.generate

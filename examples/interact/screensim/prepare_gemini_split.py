@@ -9,14 +9,18 @@ import subprocess
 import sys
 
 
-def build_manifest(source, source_raw, engine_root, human_model):
+def build_manifest(source, source_raw, engine_root, human_model, persona="baseline"):
     manifest = deepcopy(source)
     revision = subprocess.check_output(
         ["git", "-C", str(engine_root), "rev-parse", "HEAD"], text=True
     ).strip()
     sys.path.insert(0, str(engine_root.resolve()))
     from screensim.interact.composite import design_composite_episodes
+    from screensim.interact.personas import PERSONAS
     from screensim.tasks import by_id
+
+    if persona not in PERSONAS:
+        raise ValueError(f"unknown ScreenSim persona: {persona}")
 
     for scenario in manifest["scenarios"]:
         spec = scenario["spec"]
@@ -25,7 +29,7 @@ def build_manifest(source, source_raw, engine_root, human_model):
         if episode_index >= len(episodes) or not episodes[episode_index].ok:
             raise ValueError(f"scenario no longer certifies: {scenario['id']}")
         spec["config"].update(
-            human="gemini", human_model=human_model, max_turns=160
+            human="gemini", human_model=human_model, persona=persona, max_turns=160
         )
     counts = {
         "train_scenarios": sum(s["split"] == "train" for s in manifest["scenarios"]),
@@ -35,11 +39,17 @@ def build_manifest(source, source_raw, engine_root, human_model):
     }
     if counts != {"train_scenarios": 18, "validation_scenarios": 12}:
         raise ValueError(f"expected frozen 18/12 RL split, got {counts}")
+    persona_tag = "" if persona == "baseline" else f"_{persona}"
+    engine_diff = subprocess.check_output(
+        ["git", "-C", str(engine_root), "diff", "--binary", "HEAD"]
+    )
     manifest.update(
-        split_version=f"screensim_rl_v3_gemini37flash_18train_12val_engine{revision[:7]}",
+        split_version=f"screensim_rl_v3_gemini37flash{persona_tag}_18train_12val_engine{revision[:7]}",
         source_manifest_sha256=hashlib.sha256(source_raw).hexdigest(),
         engine_revision=revision,
+        engine_worktree_diff_sha256=(hashlib.sha256(engine_diff).hexdigest() if engine_diff else None),
         profile=f"plan_human_v3:{human_model}",
+        persona=persona,
         human_mode="free",
         grader="person",
         counts=counts,
@@ -73,10 +83,11 @@ def main():
     parser.add_argument("--engine-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--human-model", default="gemini-3.7-flash")
+    parser.add_argument("--persona", default="baseline")
     args = parser.parse_args()
     source_raw = args.source.read_bytes()
     manifest = build_manifest(
-        json.loads(source_raw), source_raw, args.engine_root, args.human_model
+        json.loads(source_raw), source_raw, args.engine_root, args.human_model, args.persona
     )
     args.output_dir.mkdir(parents=True, exist_ok=False)
     manifest["source_manifest"] = str(args.source.resolve())

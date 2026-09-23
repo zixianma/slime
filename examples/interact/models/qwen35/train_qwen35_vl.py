@@ -11,6 +11,11 @@ sys.path.insert(0, str(ROOT))
 from slime.utils.arguments import parse_args
 
 args = parse_args()
+if worker_timeout := os.environ.get("Q35_WORKER_TIMEOUT"):
+    worker_timeout = int(worker_timeout)
+    if worker_timeout < 180:
+        raise ValueError("Q35_WORKER_TIMEOUT must be at least 180 seconds")
+    args.interact["worker_timeout"] = worker_timeout
 split_root = Path(os.environ.get(
     "Q35_SPLIT", "/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-v2-18train-12val"
 ))

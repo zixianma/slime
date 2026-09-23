@@ -11,3 +11,19 @@ def test_prompt_rows_preserve_split_and_gemini_spec():
     assert len(rows) == 1
     assert rows[0]["metadata"]["scenario_id"] == "val-a"
     assert rows[0]["metadata"]["episode"]["config"]["human"] == "gemini"
+
+
+def test_prompt_rows_preserve_explicit_persona():
+    manifest = {
+        "split_version": "gemini-classic-novice-v1",
+        "scenarios": [{
+            "id": "train-a",
+            "split": "train",
+            "spec": {
+                "engine": "screensim",
+                "config": {"human": "gemini", "persona": "classic_novice"},
+            },
+        }],
+    }
+    rows = prompt_rows(manifest, "train")
+    assert rows[0]["metadata"]["episode"]["config"]["persona"] == "classic_novice"

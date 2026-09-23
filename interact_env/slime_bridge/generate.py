@@ -13,6 +13,18 @@ from ..protocol import Action, Decision, EpisodeResult, EpisodeSpec
 from ..runtime import Environment
 
 
+_UNBACKED_MULTIMODAL_TOKENS = (
+    "<|image_pad|>", "<|video_pad|>", "<|vision_start|>", "<|vision_end|>",
+)
+
+
+def sanitize_observation_text(value):
+    """Prevent generated control tokens echoed in dialogue from becoming fake media inputs."""
+    for token in _UNBACKED_MULTIMODAL_TOKENS:
+        value = value.replace(token, f"[generated {token[2:-2]} token]")
+    return value
+
+
 def cooking_worker_prefix(engine):
     if engine != 'cooking' or os.environ.get('COOKING_BIND_RENDER_WORKERS') != '1':
         return []
@@ -30,10 +42,15 @@ def encode_decision(decision, tokenizer, processor, timings=None):
     images = [Image.open(io.BytesIO(base64.b64decode(s.split(",", 1)[1]))).convert("RGB")
               for s in decision["images"]]
     decoded = time.perf_counter()
+    # A sampled response can rarely contain a reserved multimodal token. The native engine
+    # echoes that response into the next observation as ordinary text; leaving the token
+    # intact makes SGLang expect media that does not exist and reject the request.
+    user_text = sanitize_observation_text(decision["user"])
+    system_text = sanitize_observation_text(decision["system"])
     # Native clients send the user text first, then ordered observation images.
-    content = [{"type": "text", "text": decision["user"]}] + [{"type": "image"} for _ in images]
-    messages = ([{"role": "system", "content": decision["system"]}] if decision["system"] else [])
-    messages.append({"role": "user", "content": content if images else decision["user"]})
+    content = [{"type": "text", "text": user_text}] + [{"type": "image"} for _ in images]
+    messages = ([{"role": "system", "content": system_text}] if system_text else [])
+    messages.append({"role": "user", "content": content if images else user_text})
     template = processor if images else tokenizer
     if template is None:
         raise ValueError("image observations require a multimodal processor")
