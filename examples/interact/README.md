@@ -10,6 +10,7 @@ clock, grading, and artifacts remain inside the engine.
 | Goal | Guide | Status |
 | --- | --- | --- |
 | Reproduce ScreenSim + Gemini-user RL | [ScreenSim Gemini reproduction](docs/SCREENSIM_GEMINI_REPRO.md) | Supported; update-12 run and matched full-suite evaluation complete |
+| Review new-task ScreenSim RL results | [New-task results summary](docs/SCREENSIM_NEW_TASK_RESULTS_SUMMARY.md) | Baseline and classic-novice users, with and without assistant manual |
 | Reproduce CookSim + Gemini-user RL | [CookSim Gemini reproduction](docs/COOKING_GEMINI_REPRO.md) | Supported and validated through checkpoint continuation |
 | Compare complete checkpoint suites | [Full-suite evaluation](docs/FULL_SUITE_EVAL.md) | Supported for ScreenSim and CookSim |
 | Operate or recover a run | [Runbook](docs/RUNBOOK.md) | Supported |
