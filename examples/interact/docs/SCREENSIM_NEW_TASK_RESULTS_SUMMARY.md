@@ -4,71 +4,97 @@ On the primary scenario-weighted strict-success measure, **none of the four comp
 
 ## Strict success at updates 0 and 12
 
-The assistant is Qwen3.5-4B and the simulated user is Gemini 3.7 Flash. “Manual” means the assistant receives the task manual in **training, development, and test**. Each cell compares update **0 → 12** for the same method and split. Strict success requires the requested phone state by the deadline without lasting unrequested changes. Parentheses show the percentage-point (pp) change; **bold ↑** marks a numerical gain, not a statistically established improvement. A dash means no full-split checkpoint evaluation was run.
+The assistant is Qwen3.5-4B and the simulated user is Gemini 3.7 Flash. “Manual” means the assistant receives the task manual in **training, development, and test**. Each method has separate update-0 and update-12 rows. Strict success requires the requested phone state by the deadline without lasting unrequested changes. On update-12 rows, parentheses show the change from update 0 in percentage points (pp), calculated before rounding; **bold ↑** marks a numerical gain, not a statistically established improvement. A dash means no full-split checkpoint evaluation was run.
 
-| Method (user; assistant manual) | Train count | Train success % (Δ pp) | Dev count | Dev success % (Δ pp) | Frozen-test count | Frozen-test success % (Δ pp) |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline; no manual | 90/408 → **94/408** | 22.1% → **23.0% (↑ +1.0)** | 5/32 → **8/32** | 15.6% → **25.0% (↑ +9.4)** | 25/90 → 23/90 | 27.8% → 25.6% (−2.2) |
-| Baseline; manual | — | — | 19/96 → 6/96 | 19.8% → 6.3% (−13.5) | 25/90 → 15/90 | 27.8% → 16.7% (−11.1) |
-| Classic novice; no manual | — | — | 2/96 → **4/96** | 2.1% → **4.2% (↑ +2.1)** | 3/90 → **4/90** | 3.3% → **4.4% (↑ +1.1)** |
-| Classic novice; manual | 39/408 → 26/408 | 9.6% → 6.4% (−3.2) | 4/96 → **6/96** | 4.2% → **6.3% (↑ +2.1)** | 8/90 → 5/90 | 8.9% → 5.6% (−3.3) |
+| Method (user; assistant manual) | Update | Train count | Train success % | Dev count | Dev success % | Frozen-test count | Frozen-test success % |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 90/408 | 22.1% | 5/32 | 15.6% | 25/90 | 27.8% |
+| Baseline; no manual | 12 | **94/408** | **23.0% (↑ +1.0 pp)** | **8/32** | **25.0% (↑ +9.4 pp)** | 23/90 | 25.6% (−2.2 pp) |
+| Baseline; manual | 0 | — | — | 19/96 | 19.8% | 25/90 | 27.8% |
+| Baseline; manual | 12 | — | — | 6/96 | 6.3% (−13.5 pp) | 15/90 | 16.7% (−11.1 pp) |
+| Classic novice; no manual | 0 | — | — | 2/96 | 2.1% | 3/90 | 3.3% |
+| Classic novice; no manual | 12 | — | — | **4/96** | **4.2% (↑ +2.1 pp)** | **4/90** | **4.4% (↑ +1.1 pp)** |
+| Classic novice; manual | 0 | 39/408 | 9.6% | 4/96 | 4.2% | 8/90 | 8.9% |
+| Classic novice; manual | 12 | 26/408 | 6.4% (−3.2 pp) | **6/96** | **6.3% (↑ +2.1 pp)** | 5/90 | 5.6% (−3.3 pp) |
 
 The baseline/no-manual **development** cells use one complete pass of 32 scenarios per checkpoint. Every other development cell uses three passes (96 rollouts); every frozen-test cell uses three passes (90 rollouts). The two available train comparisons use three passes of 136 scenarios (408 rollouts). Repeated passes revisit the same scenarios and therefore measure rollout variability, not uncertainty across new tasks. Differences of one or two successes are especially fragile. The two personas also differ in difficulty, so comparing their raw rates does not isolate the manual’s effect.
 
 ## Other evaluation metrics
 
-**Task-macro strict success** averages each task’s scenario success rate, then weights the tasks equally. It can move differently from the scenario-weighted primary metric because tasks have different numbers of scenarios. Each cell is update **0 → 12**, with its change in pp.
+**Task-macro strict success** averages each task’s scenario success rate, then weights the tasks equally. It can move differently from the scenario-weighted primary metric because tasks have different numbers of scenarios.
 
-| Method | Train task-macro success % (Δ pp) | Dev task-macro success % (Δ pp) | Frozen-test task-macro success % (Δ pp) |
-| --- | ---: | ---: | ---: |
-| Baseline; no manual | 23.1% → **23.9% (↑ +0.8)** | 16.7% → **25.8% (↑ +9.1)** | 28.8% → **31.8% (↑ +3.0)** |
-| Baseline; manual | — | 20.7% → 6.1% (−14.6) | 29.3% → 21.2% (−8.1) |
-| Classic novice; no manual | — | 2.5% → **4.0% (↑ +1.5)** | 4.5% → **7.1% (↑ +2.5)** |
-| Classic novice; manual | 10.2% → 7.2% (−3.0) | 4.5% → **6.6% (↑ +2.0)** | 13.1% → 6.6% (−6.6) |
+| Method | Update | Train task-macro success % | Dev task-macro success % | Frozen-test task-macro success % |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 23.1% | 16.7% | 28.8% |
+| Baseline; no manual | 12 | **23.9% (↑ +0.8 pp)** | **25.8% (↑ +9.1 pp)** | **31.8% (↑ +3.0 pp)** |
+| Baseline; manual | 0 | — | 20.7% | 29.3% |
+| Baseline; manual | 12 | — | 6.1% (−14.6 pp) | 21.2% (−8.1 pp) |
+| Classic novice; no manual | 0 | — | 2.5% | 4.5% |
+| Classic novice; no manual | 12 | — | **4.0% (↑ +1.5 pp)** | **7.1% (↑ +2.5 pp)** |
+| Classic novice; manual | 0 | 10.2% | 4.5% | 13.1% |
+| Classic novice; manual | 12 | 7.2% (−3.0 pp) | **6.6% (↑ +2.0 pp)** | 6.6% (−6.6 pp) |
 
 **Goal attainment** checks whether the final phone state satisfies the requested goal, regardless of the deadline or lasting unrequested changes. It is therefore less stringent than strict success. Counts and percentages are kept in separate columns; `n/r` means the detailed diagnostic was not recorded, whereas `—` means no full train-split checkpoint evaluation was run.
 
-| Method | Train goal count | Train goal % | Dev goal count | Dev goal % | Frozen-test goal count | Frozen-test goal % |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline; no manual | 124/408 → **132/408** | 30.4% → **32.4% ↑** | n/r | n/r | 31/90 → 29/90 | 34.4% → 32.2% |
-| Baseline; manual | — | — | 33/96 → 9/96 | 34.4% → 9.4% | 31/90 → 22/90 | 34.4% → 24.4% |
-| Classic novice; no manual | — | — | 5/96 → **6/96** | 5.2% → **6.3% ↑** | 4/90 → 4/90 | 4.4% → 4.4% |
-| Classic novice; manual | 62/408 → **64/408** | 15.2% → **15.7% ↑** | 12/96 → 12/96 | 12.5% → 12.5% | 14/90 → 14/90 | 15.6% → 15.6% |
+| Method | Update | Train goal count | Train goal % | Dev goal count | Dev goal % | Frozen-test goal count | Frozen-test goal % |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 124/408 | 30.4% | n/r | n/r | 31/90 | 34.4% |
+| Baseline; no manual | 12 | **132/408** | **32.4% (↑ +2.0 pp)** | n/r | n/r | 29/90 | 32.2% (−2.2 pp) |
+| Baseline; manual | 0 | — | — | 33/96 | 34.4% | 31/90 | 34.4% |
+| Baseline; manual | 12 | — | — | 9/96 | 9.4% (−25.0 pp) | 22/90 | 24.4% (−10.0 pp) |
+| Classic novice; no manual | 0 | — | — | 5/96 | 5.2% | 4/90 | 4.4% |
+| Classic novice; no manual | 12 | — | — | **6/96** | **6.3% (↑ +1.0 pp)** | 4/90 | 4.4% (0.0 pp) |
+| Classic novice; manual | 0 | 62/408 | 15.2% | 12/96 | 12.5% | 14/90 | 15.6% |
+| Classic novice; manual | 12 | **64/408** | **15.7% (↑ +0.5 pp)** | 12/96 | 12.5% (0.0 pp) | 14/90 | 15.6% (0.0 pp) |
 
 ### Training reward
 
 Only two methods have complete three-pass train-catalog checkpoint evaluations. Each checkpoint has 408 rollouts over all 136 training scenarios. Training uses the shaped `screensim_prevention_turns_v1` reward; development/test use binary strict reward, so their reported mean reward would duplicate strict success and is not directly comparable to the training-reward numbers below.
 
-| Method | Train positive-reward count | Train positive-reward % | Train mean shaped reward |
-| --- | ---: | ---: | ---: |
-| Baseline; no manual | 299/408 → **306/408** | 73.3% → **75.0% ↑** | 0.3598 → **0.3625 ↑** |
-| Classic novice; manual | 256/408 → 224/408 | 62.7% → 54.9% | 0.1983 → 0.1477 |
+| Method | Update | Train positive-reward count | Train positive-reward % | Train mean shaped reward |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 299/408 | 73.3% | 0.3598 |
+| Baseline; no manual | 12 | **306/408** | **75.0% (↑ +1.7 pp)** | **0.3625 ↑** |
+| Classic novice; manual | 0 | 256/408 | 62.7% | 0.1983 |
+| Classic novice; manual | 12 | 224/408 | 54.9% (−7.8 pp) | 0.1477 |
 
 <details>
 <summary>Additional simulator diagnostics (update 0 → 12)</summary>
 
 F1 summarizes detection precision and recall for error opportunities that actually fired. False flags count incorrect assistant error calls; turns are assistant turns per rollout. These are descriptive diagnostics: opportunity exposure and episode length can differ across checkpoints. Cells show the mean over the saved split rollouts. `n/r` means the diagnostic was not recorded and `—` means the full train-split evaluation was not run.
 
-| Method | Train mean F1 | Dev mean F1 | Frozen-test mean F1 |
-| --- | ---: | ---: | ---: |
-| Baseline; no manual | 0.687 → 0.607 | n/r | 0.723 → 0.684 |
-| Baseline; manual | — | 0.639 → 0.505 | 0.831 → 0.667 |
-| Classic novice; no manual | — | 0.293 → 0.163 | 0.247 → 0.253 |
-| Classic novice; manual | 0.537 → 0.470 | 0.559 → 0.468 | 0.558 → 0.515 |
+| Method | Update | Train mean F1 | Dev mean F1 | Frozen-test mean F1 |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 0.687 | n/r | 0.723 |
+| Baseline; no manual | 12 | 0.607 | n/r | 0.684 |
+| Baseline; manual | 0 | — | 0.639 | 0.831 |
+| Baseline; manual | 12 | — | 0.505 | 0.667 |
+| Classic novice; no manual | 0 | — | 0.293 | 0.247 |
+| Classic novice; no manual | 12 | — | 0.163 | 0.253 |
+| Classic novice; manual | 0 | 0.537 | 0.559 | 0.558 |
+| Classic novice; manual | 12 | 0.470 | 0.468 | 0.515 |
 
-| Method | Train mean false flags | Dev mean false flags | Frozen-test mean false flags |
-| --- | ---: | ---: | ---: |
-| Baseline; no manual | 0.828 → 1.517 | n/r | 0.856 → 1.356 |
-| Baseline; manual | — | 0.542 → 0.250 | 0.200 → 0.167 |
-| Classic novice; no manual | — | 3.000 → 4.115 | 2.256 → 3.922 |
-| Classic novice; manual | 1.216 → 1.446 | 1.000 → 1.802 | 1.167 → 1.867 |
+| Method | Update | Train mean false flags | Dev mean false flags | Frozen-test mean false flags |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 0.828 | n/r | 0.856 |
+| Baseline; no manual | 12 | 1.517 | n/r | 1.356 |
+| Baseline; manual | 0 | — | 0.542 | 0.200 |
+| Baseline; manual | 12 | — | 0.250 | 0.167 |
+| Classic novice; no manual | 0 | — | 3.000 | 2.256 |
+| Classic novice; no manual | 12 | — | 4.115 | 3.922 |
+| Classic novice; manual | 0 | 1.216 | 1.000 | 1.167 |
+| Classic novice; manual | 12 | 1.446 | 1.802 | 1.867 |
 
-| Method | Train mean assistant turns | Dev mean assistant turns | Frozen-test mean assistant turns |
-| --- | ---: | ---: | ---: |
-| Baseline; no manual | 12.57 → 13.09 | n/r | 13.56 → 13.51 |
-| Baseline; manual | — | 12.20 → 12.83 | 12.50 → 12.76 |
-| Classic novice; no manual | — | 27.88 → 28.04 | 28.57 → 32.47 |
-| Classic novice; manual | 23.62 → 24.98 | 24.02 → 28.49 | 25.46 → 28.70 |
+| Method | Update | Train mean assistant turns | Dev mean assistant turns | Frozen-test mean assistant turns |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 12.57 | n/r | 13.56 |
+| Baseline; no manual | 12 | 13.09 | n/r | 13.51 |
+| Baseline; manual | 0 | — | 12.20 | 12.50 |
+| Baseline; manual | 12 | — | 12.83 | 12.76 |
+| Classic novice; no manual | 0 | — | 27.88 | 28.57 |
+| Classic novice; no manual | 12 | — | 28.04 | 32.47 |
+| Classic novice; manual | 0 | 23.62 | 24.02 | 25.46 |
+| Classic novice; manual | 12 | 24.98 | 28.49 | 28.70 |
 
 </details>
 
@@ -112,16 +138,18 @@ Source reports: `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-ge
 
 The classic-novice/no-manual run continued from update 12 to update 24. In this consistent no-manual condition, the update-24 frozen-test result is five more successes than update 0 on the same 30 scenarios over three stochastic passes; it is a separate 24-update comparison.
 
-| Update-24 split | Success count | Success % |
-| --- | ---: | ---: |
-| Development | 2/96 | 2.1% |
-| Frozen test | 8/90 | 8.9% |
+| Update | Split | Success count | Success % |
+| ---: | --- | ---: | ---: |
+| 24 | Development | 2/96 | 2.1% |
+| 24 | Frozen test | 8/90 | 8.9% |
 
 An earlier evaluation of this run inadvertently supplied a manual **only at test time**, although training and development used no manual:
 
-| Split | Update 0 count | Update 0 % | Update 12 count | Update 12 % | Update 24 count | Update 24 % |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Frozen test, manual only at test | 4/90 | 4.4% | **11/90** | **12.2%** | 8/90 | 8.9% |
+| Test context | Update | Success count | Success % |
+| --- | ---: | ---: | ---: |
+| Manual only at test | 0 | 4/90 | 4.4% |
+| Manual only at test | 12 | 11/90 | 12.2% |
+| Manual only at test | 24 | 8/90 | 8.9% |
 
 These independent passes are not paired with the consistent no-manual test passes in the main table and do not estimate a causal manual effect. The corrected no-manual test results are in the main table and the update-24 table above.
 
