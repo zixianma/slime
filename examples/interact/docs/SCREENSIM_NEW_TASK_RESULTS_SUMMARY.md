@@ -1,26 +1,87 @@
 # ScreenSim RL on the new task library
 
-These experiments train a Qwen3.5-4B assistant with a Gemini 3.7 Flash simulated user. The new task-disjoint library has 50 training tasks (136 scenarios), 11 development tasks (32 scenarios), and 11 frozen-test tasks (30 scenarios). Each of the 12-update runs samples six training scenarios eight times per update, using the shaped `screensim_prevention_turns_v1` reward. Development and test results use strict `screensim_intime_success_v1`: the requested phone state must be reached on time without lasting unrequested changes. The two user personas, **baseline** and **classic novice**, are separate conditions; all comparisons within a persona use the same task IDs.
+Across the four completed 12-update runs, **none shows a clear frozen-test gain**. The only positive test change is one additional success in 90 rollouts for the classic-novice user without a manual. Baseline-user training without a manual improves development success in its single evaluation pass, but its three-pass test result falls slightly. With a manual throughout, both user personas finish below their update-0 frozen-test results.
 
-## Strict scenario success
+## Strict success at updates 0 and 12
 
-| Simulated user | Assistant manual during training and evaluation | Development, update 0 → 12 | Frozen test, update 0 → 12 |
-| --- | --- | ---: | ---: |
-| Baseline | No | 15.6% → 25.0% | 27.8% → 25.6% |
-| Baseline | Yes | 19.8% → 6.3% | 27.8% → 16.7% |
-| Classic novice | No | 2.1% → 4.2% | 3.3% → 4.4% |
-| Classic novice | Yes | 4.2% → 6.3% | 8.9% → 5.6% |
+The assistant is Qwen3.5-4B and the simulated user is Gemini 3.7 Flash. “Manual” means the assistant receives the task manual in **training, development, and test**. Each row compares the same persona, manual condition, and task split at two checkpoints. Strict success requires the requested phone state by the deadline without lasting unrequested changes. **Δ** is update 12 minus update 0 in percentage points (pp); **↑ bold** marks a numerical gain, not a statistically established improvement.
 
-The no-manual classic-novice run continued to update 24: development success was **2.1%** and frozen-test success was **8.9%**. Baseline/no-manual development numbers come from one complete pass of 32 scenarios per checkpoint. Every other development cell and every test cell above uses three independent passes, totaling 96 and 90 rollouts per checkpoint, respectively.
+| User | Manual | Split | Update 0 count | Update 0 % | Update 12 count | Update 12 % | Δ (pp) |
+| --- | :---: | --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | No | Development | 5/32 | 15.6% | **8/32** | **25.0%** | **↑ +9.4** |
+| Baseline | No | Frozen test | 25/90 | 27.8% | 23/90 | 25.6% | −2.2 |
+| Baseline | Yes | Development | 19/96 | 19.8% | 6/96 | 6.3% | −13.5 |
+| Baseline | Yes | Frozen test | 25/90 | 27.8% | 15/90 | 16.7% | −11.1 |
+| Classic novice | No | Development | 2/96 | 2.1% | **4/96** | **4.2%** | **↑ +2.1** |
+| Classic novice | No | Frozen test | 3/90 | 3.3% | **4/90** | **4.4%** | **↑ +1.1** |
+| Classic novice | Yes | Development | 4/96 | 4.2% | **6/96** | **6.3%** | **↑ +2.1** |
+| Classic novice | Yes | Frozen test | 8/90 | 8.9% | 5/90 | 5.6% | −3.3 |
 
-The baseline-user/manual run began with the highest development success among the manual-enabled conditions, but **fell on both development and frozen test after RL**. Classic novice with a manual improved slightly on development and fell on test. Baseline without a manual improved on its one-pass development measure, while its three-pass frozen-test mean was nearly unchanged. Thus these completed 12-update runs provide no clear frozen-test gain. The differing user personas also change rollout difficulty, so percentages across personas should not be read as an isolated manual effect.
+The baseline/no-manual **development** row uses one complete pass of 32 scenarios per checkpoint. Every other development row uses three passes (96 rollouts); every frozen-test row uses three passes (90 rollouts). Repeated passes revisit the same scenarios and therefore measure rollout variability, not uncertainty across new tasks. Differences of one or two successes are especially fragile. The two personas also differ in difficulty, so comparing their raw rates does not isolate the manual’s effect.
 
-## Training-task results and initial reward signal
+## Full training-task evaluation
 
-Three complete train-catalog passes per checkpoint evaluated all 136 training scenarios in each pass. For baseline without a manual, strict train success was **22.1% → 23.0%** at updates 0 → 12 (90/408 → 94/408). For classic novice with a manual, it was **9.6% → 6.4%** (39/408 → 26/408). Their positive shaped-reward rollouts were **299/408 → 306/408** and **256/408 → 224/408**, respectively.
+Only two conditions have completed full train-catalog checkpoint evaluations. Each checkpoint was evaluated in three passes over all 136 training scenarios (408 rollouts). Positive shaped reward is a training-signal measure; it is **not** strict task success.
 
-Before the baseline-user/manual RL run, the frozen update-0 policy was rolled out eight times on every training scenario, matching the RL group size. It received positive shaped reward on **128/136 scenarios** and **50/50 tasks** at least once, with **869/1,088** positive-reward rollouts and **207/1,088** strict successes. The corresponding classic-novice/manual sweep had positive reward on **110/136 scenarios** and **45/50 tasks**, with **620/1,088** positive-reward rollouts and **90/1,088** strict successes. Broad initial reward coverage therefore did not ensure improvement after RL.
+| User | Manual | Measure | Update 0 count | Update 0 % | Update 12 count | Update 12 % | Δ (pp) |
+| --- | :---: | --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | No | Strict success | 90/408 | 22.1% | **94/408** | **23.0%** | **↑ +1.0** |
+| Baseline | No | Positive shaped reward | 299/408 | 73.3% | **306/408** | **75.0%** | **↑ +1.7** |
+| Classic novice | Yes | Strict success | 39/408 | 9.6% | 26/408 | 6.4% | −3.2 |
+| Classic novice | Yes | Positive shaped reward | 256/408 | 62.7% | 224/408 | 54.9% | −7.8 |
 
-An earlier classic-novice run trained and evaluated on development **without** an assistant manual, but its original test evaluator supplied a manual only at test time. That mixed-context test reported **4.4%, 12.2%, and 8.9%** at updates 0, 12, and 24. A corrected no-manual test rerun found **3.3%, 4.4%, and 8.9%** at the same checkpoints, as shown above. The two test conditions use independent stochastic passes and should be labeled separately.
+<details>
+<summary>Task split, training protocol, and source artifacts</summary>
 
-These are small fixed task sets: three passes measure variation in rollouts on the same 32 development or 30 test scenarios, not uncertainty over a larger population of tasks. Success differences of a few scenarios should therefore be interpreted cautiously. The checkpoint comparisons describe this proof-of-concept run and do not establish a generalization benefit from RL or a causal effect of the manual.
+The task-disjoint library has 50 training tasks (136 scenarios), 11 development tasks (32 scenarios), and 11 frozen-test tasks (30 scenarios). The 12-update runs sampled six training scenarios eight times per update (48 rollouts/update), using `screensim_prevention_turns_v1` shaped reward. Development and test used `screensim_intime_success_v1`. The classic-novice/no-manual run also continued to update 24. The same task IDs appear for both personas within each split, but the simulated user behavior differs.
+
+Verified artifacts on the project filesystem:
+
+| Result | Artifact |
+| --- | --- |
+| Baseline/no-manual dev | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-gemini37-baseline-training-20261004/completion-verification.json` |
+| Baseline/no-manual test | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-no-manual-consistent-20261004/baseline-test/summary.json` |
+| Baseline/manual dev and test | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-gemini37-baseline-manual-20261006/final-dev-test-3pass/summary.json` |
+| Classic-novice/no-manual dev and test | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-classic-novice-no-manual-test-u0-u12-u24-3pass-20261006/summary.json` |
+| Classic-novice/manual dev and test | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-gemini37-classic-novice-manual-20261004/final-dev-test-3pass/summary.json` ([public results page](https://zixianma.github.io/interact-rl-replays/screensim-classic-novice-manual-u0-vs-u12/)) |
+| Full training-task evaluation | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-new-task-train-eval-3pass-20261006/summary.json` |
+
+</details>
+
+<details>
+<summary>Initial reward-signal coverage with the assistant manual</summary>
+
+The update-0 policy was evaluated eight times per training scenario, matching the optimizer’s eight-rollout group size. Positive reward occurred at least once on most scenarios, but this did not ensure improvement after RL.
+
+| User | Positive-reward scenarios, count | % | Positive-reward tasks, count | % | Positive-reward rollouts, count | % | Strict-success rollouts, count | % |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline | 128/136 | 94.1% | 50/50 | 100.0% | 869/1,088 | 79.9% | 207/1,088 | 19.0% |
+| Classic novice | 110/136 | 80.9% | 45/50 | 90.0% | 620/1,088 | 57.0% | 90/1,088 | 8.3% |
+
+Source reports: `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-gemini37-baseline-manual-20261006/pre-rl-train-u0-8pass/signal-report.json` and `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-gemini37-classic-novice-manual-20261004/pre-rl-train-u0-8pass/signal-report.json`.
+
+</details>
+
+<details>
+<summary>Update-24 continuation and earlier mixed-manual test</summary>
+
+The classic-novice/no-manual run continued from update 12 to update 24. In this consistent no-manual condition, the update-24 frozen-test result is five more successes than update 0 on the same 30 scenarios over three stochastic passes; it is a separate 24-update comparison.
+
+| Update-24 split | Success count | Success % |
+| --- | ---: | ---: |
+| Development | 2/96 | 2.1% |
+| Frozen test | 8/90 | 8.9% |
+
+An earlier evaluation of this run inadvertently supplied a manual **only at test time**, although training and development used no manual:
+
+| Split | Update 0 count | Update 0 % | Update 12 count | Update 12 % | Update 24 count | Update 24 % |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Frozen test, manual only at test | 4/90 | 4.4% | **11/90** | **12.2%** | 8/90 | 8.9% |
+
+These independent passes are not paired with the consistent no-manual test passes in the main table and do not estimate a causal manual effect. The corrected no-manual test results are in the main table and the update-24 table above.
+
+Sources: `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-classic-novice-no-manual-test-u0-u12-u24-3pass-20261006/summary.json`, `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-u0-u12-final-eval-3pass-20261003/summary.json`, and `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-u24-final-eval-3pass-20261004/summary.json`.
+
+</details>
+
+These fixed, small task sets make the results a proof of concept for RL interaction in ScreenSim. They do not establish a generalization benefit from RL or a causal effect of the manual.
