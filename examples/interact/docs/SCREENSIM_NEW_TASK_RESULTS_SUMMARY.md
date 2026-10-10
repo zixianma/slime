@@ -47,25 +47,36 @@ The baseline/no-manual **development** cells use one complete pass of 32 scenari
 | Classic novice; manual | 0 | 62/408 | 15.2% | — | 12/96 | 12.5% | — | 14/90 | 15.6% | — |
 | Classic novice; manual | 12 | **64/408** | **15.7%** | **↑ +0.5** | 12/96 | 12.5% | 0.0 | 14/90 | 15.6% | 0.0 |
 
-### Training reward
+**On-time goal success** requires the requested state by the simulator's deadline but permits lasting unrequested changes. It separates deadline misses from the extra-change failures excluded by strict success. The frozen-test count stays at 14/90 for classic novice with a manual while strict success falls from 8/90 to 5/90; more of its on-time goals therefore end with extra changes at update 12.
 
-The available complete three-pass train-catalog checkpoint evaluations each have 408 rollouts over all 136 training scenarios. Training uses the shaped `screensim_prevention_turns_v1` reward; development/test use binary strict reward, so their reported mean reward would duplicate strict success and is not directly comparable to the training-reward numbers below.
-
-| Method | Update | Train positive-reward count | Train positive-reward % | Reward Δ pp | Train mean shaped reward | Mean reward Δ |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline; no manual | 0 | 299/408 | 73.3% | — | 0.3598 | — |
-| Baseline; no manual | 12 | **306/408** | **75.0%** | **↑ +1.7** | **0.3625** | **↑ +0.0026** |
-| Baseline; manual | 0 | 332/408 | 81.4% | — | 0.3680 | — |
-| Baseline; manual | 12 | 280/408 | 68.6% | −12.7 | 0.2566 | −0.1113 |
-| Classic novice; no manual | 0 | 116/408 | 28.4% | — | 0.0262 | — |
-| Classic novice; no manual | 12 | 93/408 | 22.8% | −5.6 | 0.0025 | −0.0237 |
-| Classic novice; manual | 0 | 256/408 | 62.7% | — | 0.1983 | — |
-| Classic novice; manual | 12 | 224/408 | 54.9% | −7.8 | 0.1477 | −0.0506 |
+| Method | Update | Train count | Train on-time goal % | Train Δ pp | Dev count | Dev on-time goal % | Dev Δ pp | Frozen-test count | Frozen-test on-time goal % | Test Δ pp |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 115/408 | 28.2% | — | n/r | n/r | n/r | 30/90 | 33.3% | — |
+| Baseline; no manual | 12 | 127/408 | 31.1% | +2.9 | n/r | n/r | n/r | 29/90 | 32.2% | −1.1 |
+| Baseline; manual | 0 | 120/408 | 29.4% | — | 33/96 | 34.4% | — | 30/90 | 33.3% | — |
+| Baseline; manual | 12 | 79/408 | 19.4% | −10.0 | 8/96 | 8.3% | −26.0 | 21/90 | 23.3% | −10.0 |
+| Classic novice; no manual | 0 | 20/408 | 4.9% | — | 5/96 | 5.2% | — | 4/90 | 4.4% | — |
+| Classic novice; no manual | 12 | 23/408 | 5.6% | +0.7 | 6/96 | 6.3% | +1.0 | 4/90 | 4.4% | 0.0 |
+| Classic novice; manual | 0 | 61/408 | 15.0% | — | 11/96 | 11.5% | — | 14/90 | 15.6% | — |
+| Classic novice; manual | 12 | 62/408 | 15.2% | +0.2 | 12/96 | 12.5% | +1.0 | 14/90 | 15.6% | 0.0 |
 
 <details>
 <summary>Additional simulator diagnostics (update 0 → 12)</summary>
 
-F1 summarizes detection precision and recall for error opportunities that actually fired. False flags count incorrect assistant error calls; turns are assistant turns per rollout. These are descriptive diagnostics: opportunity exposure and episode length can differ across checkpoints. Cells show the mean over the saved split rollouts. `n/r` means the diagnostic was not recorded and `—` means the full train-split evaluation was not run.
+**Error prevention** is the number of fired mistakes detected without a lasting relevant effect, divided by all fired mistakes. Exposure varies with rollout behavior, so it is descriptive rather than a controlled success comparison. Counts are fired opportunities, not episodes. `n/r` means the per-episode report was not recoverable.
+
+| Method | Update | Train prevented/fired | Train % | Train Δ pp | Dev prevented/fired | Dev % | Dev Δ pp | Frozen-test prevented/fired | Test % | Test Δ pp |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline; no manual | 0 | 431/600 | 71.8% | — | n/r | n/r | n/r | 98/151 | 64.9% | — |
+| Baseline; no manual | 12 | 450/603 | 74.6% | +2.8 | n/r | n/r | n/r | 96/151 | 63.6% | −1.3 |
+| Baseline; manual | 0 | 473/643 | 73.6% | — | 98/137 | 71.5% | — | 104/160 | 65.0% | — |
+| Baseline; manual | 12 | 356/617 | 57.7% | −15.9 | 68/137 | 49.6% | −21.9 | 84/161 | 52.2% | −12.8 |
+| Classic novice; no manual | 0 | 157/200 | 78.5% | — | 42/52 | 80.8% | — | 32/52 | 61.5% | — |
+| Classic novice; no manual | 12 | 147/185 | 79.5% | +1.0 | 30/43 | 69.8% | −11.0 | 45/61 | 73.8% | +12.2 |
+| Classic novice; manual | 0 | 359/433 | 82.9% | — | 80/98 | 81.6% | — | 77/106 | 72.6% | — |
+| Classic novice; manual | 12 | 321/401 | 80.0% | −2.9 | 70/88 | 79.5% | −2.1 | 81/106 | 76.4% | +3.8 |
+
+F1 summarizes detection precision and recall for error opportunities that actually fired. False flags count incorrect assistant error calls; turns are assistant turns per rollout. These are descriptive diagnostics: opportunity exposure and episode length can differ across checkpoints. Cells show the mean over the saved split rollouts. `n/r` means the diagnostic was not recorded.
 
 | Method | Update | Train mean F1 | Dev mean F1 | Frozen-test mean F1 |
 | --- | ---: | ---: | ---: | ---: |
@@ -122,7 +133,7 @@ Verified artifacts on the project filesystem:
 | Baseline/no-manual and classic-novice/manual train | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-new-task-train-eval-3pass-20261006/summary.json` |
 | Baseline/manual and classic-novice/no-manual train | `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-new-task-train-eval-remaining-20261008/summary.json` |
 
-Task-macro values are the mean of the per-pass task-macro success values for each split. Goal attainment, F1, false flags, and turns are pooled from the corresponding per-pass `audit/result.json` scenario records. The corrected classic-novice/no-manual test summary records the path to each result, including a repaired update-12 pass under `recovery-1`; the secondary metrics follow those paths. Baseline/no-manual development saved only compact metrics, so its detailed simulator diagnostics are unavailable.
+Task-macro values are the mean of the per-pass task-macro success values for each split. Goal attainment, F1, false flags, and turns are pooled from the corresponding per-pass `audit/result.json` scenario records. On-time goal success and error prevention come from native `episodes/<episode_id>/report.json` files joined to those scenario records by episode ID; all included reports matched the audit strict-success verdicts. The corrected classic-novice/no-manual test summary records the path to each result, including a repaired update-12 pass under `recovery-1`; the secondary metrics follow those paths. Baseline/no-manual development saved only compact metrics, so its detailed simulator diagnostics are unavailable. Engine revisions match between updates 0 and 12 within each condition but differ across some conditions; cross-condition differences should not be read as isolated effects of persona, manual, or split.
 
 The six classic-novice/no-manual train passes reached their initial wall-time limits after saving 748 of 816 complete episodes. The remaining 68 scenarios were replayed with the same checkpoints and frozen catalog; each reconstructed 136-scenario pass passed the independent verifier at `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-new-task-train-eval-remaining-20261008/verify.py`. The new train-eval allocation used **46.81 of 49.5 approved H200 GPU-hours**, including recovery.
 
