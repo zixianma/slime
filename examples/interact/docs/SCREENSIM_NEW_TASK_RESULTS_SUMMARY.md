@@ -1,6 +1,6 @@
 # ScreenSim RL on the new task library
 
-On the primary scenario-weighted strict-success measure, **none of the four completed 12-update runs shows a clear frozen-test gain**. The only positive test change is one additional success in 90 rollouts for the classic-novice user without a manual. On the full training catalog, only baseline/no-manual increases in strict success (+1.0 percentage point); the other three methods decline. Baseline-user training without a manual improves development success in its single evaluation pass, but its three-pass test result falls slightly. With a manual throughout, both user personas finish below their update-0 frozen-test results.
+On the primary scenario-weighted strict-success measure, **none of the four completed 12-update runs shows a clear frozen-test gain**. The only positive test change is one additional success in 90 rollouts for the classic-novice user without a manual. On the full training catalog, only baseline/no-manual increases in strict success (+1.0 percentage point); the other three methods decline. Baseline-user training without a manual improves development success in its single evaluation pass, but its three-pass test result falls slightly. With a manual throughout, both user personas finish below their update-0 frozen-test results. Preliminary Gemini-only interaction-quality judgments improve for baseline + manual on dev and test, but they do not change the task-success conclusion.
 
 ## Strict success at updates 0 and 12
 
@@ -18,6 +18,19 @@ The assistant is Qwen3.5-4B and the simulated user is Gemini 3.7 Flash. “Manua
 | Classic novice; manual | 12 | 26/408 | 6.4% | −3.2 | **6/96** | **6.3%** | **↑ +2.1** | 5/90 | 5.6% | −3.3 |
 
 The baseline/no-manual **development** cells use one complete pass of 32 scenarios per checkpoint. Every other development cell uses three passes (96 rollouts); every frozen-test cell uses three passes (90 rollouts). Each available train comparison uses three passes of 136 scenarios (408 rollouts). Repeated passes revisit the same scenarios and therefore measure rollout variability, not uncertainty across new tasks. Differences of one or two successes are especially fragile. The two personas also differ in difficulty, so comparing their raw rates does not isolate the manual’s effect.
+
+## Interaction quality on manual-enabled runs
+
+Every dev and frozen-test episode of the two manual-enabled conditions received a Gemini AQ judgment. **AQ measures the quality of the assistant's utterances, separately from task success.** Baseline-user AQ rises on both splits despite its lower strict-success rate at update 12. Classic-novice AQ changes little. ScreenSim uses its native five-category rubric with a factual-grounding gate; each pass pools all assistant utterances.
+
+| User | Split | Scenarios / pass | Passes | Assistant rounds u0 | Assistant rounds u12 | Gemini AQ u0, mean ± SD | Gemini AQ u12, mean ± SD | AQ Δ |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline + manual | Dev | 32 | 3 | 972 | 516 | 44.9% ± 2.6 pp | 56.8% ± 4.1 pp | +11.9 pp |
+| Baseline + manual | Frozen test | 30 | 3 | 889 | 429 | 52.0% ± 1.4 pp | 59.8% ± 0.9 pp | +7.8 pp |
+| Classic novice + manual | Dev | 32 | 3 | 1,958 | 2,372 | 40.8% ± 1.5 pp | 40.2% ± 0.9 pp | −0.6 pp |
+| Classic novice + manual | Frozen test | 30 | 3 | 1,895 | 2,307 | 39.2% ± 2.4 pp | 41.7% ± 2.2 pp | +2.5 pp |
+
+The table gives the mean and **population SD** across three pass-level pooled-round scores. Update 0 and 12 use the same scenario IDs within each pass. All 744 episodes and 11,338 assistant utterances were scored without missing verdicts. These are **preliminary Gemini-only** numbers: the primary GPT-5.4-mini ScreenSim judge has not been run, so this is not the official interaction-quality score. The Gemini scoring summary and verdicts are at `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-interaction-quality-20261012/` (`gemini-summary.json`, `interim-results.md`).
 
 ## Other evaluation metrics
 
