@@ -21,14 +21,15 @@ The passes reuse the same scenario catalog, so SD measures stochastic rollout va
 
 AQ scores the assistant's utterances against the observed kitchen state and the cook's needs, independently of task success. CookSim's native five-category rubric grades factual grounding, situational relevance, actionable guidance, user intent uptake, and conciseness; a failed factual-grounding gate zeros a round. The official AQ averages independent Gemini and GPT judgments per round. **Only Gemini judgments are complete for this comparison.**
 
-Usable reports and decision traces exist at both checkpoints for **104 matched scenario-pass pairs**, of the 450 full-suite episode instances per checkpoint. This selected subset cannot estimate full-suite AQ. It contains 95 train and only nine validation pairs, so validation AQ cannot be summarized reliably across three passes.
+Usable reports and decision traces exist at both checkpoints for **104 matched scenario-pass pairs**, of the 450 full-suite episode instances per checkpoint. This selected subset cannot estimate full-suite AQ. It contains 95 train and only nine validation pairs; the validation-only row below is a descriptive pooled score, not a three-pass estimate.
 
-| AQ scope | Matched episode instances | Passes | Assistant rounds u0 | Assistant rounds u12 | Gemini AQ u0, mean ± SD | Gemini AQ u12, mean ± SD | AQ Δ |
+| AQ scope | Matched / full episode instances | Passes covered | Assistant rounds u0 | Assistant rounds u12 | Gemini AQ u0 | Gemini AQ u12 | AQ Δ |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Train | 95 | 3 | 6,521 | 6,094 | 23.5% ± 0.3 pp | 32.5% ± 1.9 pp | +9.0 pp |
-| Train + validation | 104 | 3 | 7,080 | 6,510 | 23.7% ± 0.5 pp | 32.5% ± 1.8 pp | +8.8 pp |
+| Train | 95/360 | 3/3 | 6,521 | 6,094 | 23.5% ± 0.3 pp | 32.5% ± 1.9 pp | +9.0 pp |
+| Validation only, partial | 9/90 | 2/3 | 559 | 416 | 27.1% (pooled) | 31.4% (pooled) | +4.3 pp |
+| Train + validation | 104/450 | 3/3 | 7,080 | 6,510 | 23.7% ± 0.5 pp | 32.5% ± 1.8 pp | +8.8 pp |
 
-Each pass pools all assistant rounds in its matched episodes. The table gives the mean and **population SD** of the three pass-level pooled-round scores. Pair coverage differs by pass (48, 42, 14), so the SD also reflects changing scenario composition. All 208 paired episodes and 13,590 assistant rounds received Gemini verdicts. The exact agent-visible image was recovered for every graded decision; the upstream scorer used its recorded-evidence fallback for kitchen state. The missing GPT component prevents an official CookSim AQ claim.
+For train and train + validation, each pass pools all assistant rounds in its matched episodes; the table gives the mean and **population SD** of the three pass-level scores. Pair coverage differs by pass (48, 42, 14), so the SD also reflects changing scenario composition. The validation-only row instead pools all 559 update-0 and 416 update-12 graded rounds across its nine matched pairs: eight pairs in pass 1, one in pass 2, and none in pass 3. Its +4.3 pp difference is **not comparable as a three-pass AQ estimate** and is highly sensitive to the available cases and episode lengths. All 208 paired episodes and 13,590 assistant rounds received Gemini verdicts. The exact agent-visible image was recovered for every graded decision; the upstream scorer used its recorded-evidence fallback for kitchen state. The missing GPT component prevents an official CookSim AQ claim.
 
 <details>
 <summary>Per-pass results and validation AQ coverage</summary>
