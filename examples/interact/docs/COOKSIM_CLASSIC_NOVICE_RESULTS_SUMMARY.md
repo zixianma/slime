@@ -1,49 +1,30 @@
 # CookSim RL with the classic-novice Gemini user
 
-The Qwen3.5-4B assistant's **strict task success increased at update 12** on the frozen 150-scenario suite: 32.44% to 42.22% overall across three passes (+9.78 percentage points). Train and validation both increased on the same frozen scenarios. A newer, independently sampled three-pass validation evaluation with complete interaction records succeeded on 58/90 episodes at update 0 and 61/90 at update 12. Its two-judge interaction-quality (AQ) scoring is in progress. This is a small proof-of-concept RL run, not evidence of broad task generalization.
+The Qwen3.5-4B assistant's **strict task success increased at update 12** in the original three-pass, 150-scenario evaluation: 32.44% to 42.22% overall (+9.78 percentage points), with increases on both train and validation. A newer, independently sampled validation-only evaluation with complete interaction records increased from 64.4% to 67.8%; its two-judge interaction-quality (AQ) scoring is in progress. These are small proof-of-concept results on fixed scenarios, not evidence of broad task generalization.
 
-## New complete-trace validation evaluation
+## Task success, interaction quality, and detection
 
-Each checkpoint was evaluated once per pass on the same 30 held-out development-validation scenarios, for three stochastic passes and 90 episodes per checkpoint. Every episode has a native report, assistant-decision record, and training audit; all six passes passed strict trace verification. The numbers below describe this **new validation-only evaluation**, distinct from the earlier full-suite results in the next section.
+Each row uses three stochastic passes of fixed scenario IDs at one checkpoint. Success is CookSim's native `won` outcome. The **original full-suite** run evaluates 120 train and 30 held-out development-validation scenarios per pass. Its AQ is a *selected, matched Gemini-only subset*: 95 of 360 train and nine of 90 validation episodes per checkpoint have usable traces, so these AQ cells do not estimate full-split quality. The **new complete-trace** run reevaluates only the 30 validation scenarios per pass, with native reports and assistant decisions for all 180 episodes. Its full two-judge AQ is pending. The two protocols differ in stochastic rollouts and effective user-model version and must not be treated as one pooled experiment.
 
-| Update | Pass 1 successes / episodes | Pass 2 successes / episodes | Pass 3 successes / episodes | Total successes / episodes | Pooled success | Δ pooled |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0 | 20/30 | 21/30 | 17/30 | 58/90 | 64.4% | — |
-| 12 | 19/30 | 23/30 | 19/30 | 61/90 | 67.8% | +3.3 pp |
+| Evaluation | Split | Update | Successes / episodes | Success, mean ± SD | AQ-eligible episodes | AQ judge | AQ | Detected / offered errors | Detection recall |
+| --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: |
+| Original full suite | Train | 0 | 116/360 | 32.22% ± 4.28 pp | 95/360 | Gemini only | 23.5% ± 0.3 pp | — | — |
+| Original full suite | Train | 12 | 152/360 | 42.22% ± 2.93 pp | 95/360 | Gemini only | 32.5% ± 1.9 pp | — | — |
+| Original full suite | Validation | 0 | 30/90 | 33.33% ± 3.33 pp | 9/90 | Gemini only | 27.1% pooled | — | — |
+| Original full suite | Validation | 12 | 38/90 | 42.22% ± 6.94 pp | 9/90 | Gemini only | 31.4% pooled | — | — |
+| New complete trace | Validation | 0 | 58/90 | 64.44% ± 6.94 pp | 90/90 | Gemini + GPT pending | Pending | 22/54 | 40.7% |
+| New complete trace | Validation | 12 | 61/90 | 67.78% ± 7.70 pp | 90/90 | Gemini + GPT pending | Pending | 15/56 | 26.8% |
 
-The comparison reuses the same scenario IDs but samples new stochastic episodes. The split has 120 training and 30 development-validation scenarios and **no separate frozen test split**; the validation cases are held-out parent variants from recipe/layout cells also represented in training. Requests for the pinned `gemini-3.7-flash` user were routed to effective `gemini-3.8-flash` in this new evaluation, so these success rates should not be combined with the earlier September evaluation as if they shared the same user-model version. All 180 detailed episodes are linked from `/gpfs/scrubbed/zixianma/checkpoints/web/cooksim-validation-aq-20261019/RUN_PLAN.md`; two-judge AQ on those episodes is pending.
+Task-success SD is the **sample SD** across three pass percentages. AQ-eligible counts indicate available matched traces; the new 90/90 cells are not yet scored by both judges. Original full-suite train AQ uses the **population SD** of three pass-level scores (unequal matched-pair coverage); its validation AQ pools nine pairs across only two passes, so it has no comparable pass-level SD. The new validation AQ will pool all rubric-applicable assistant rounds in each pass before computing a mean and SD across passes. Detection recall in the new run is the share of offered native error instances flagged validly; changing exposure (54 versus 56 errors) makes it descriptive rather than an isolated measure of policy improvement. Full original-run detection recall is unavailable because native reports were not retained for every episode. Dashes mark unavailable measurements. AQ measures utterance quality separately from task success using factual grounding, situational relevance, actionable guidance, user intent uptake, and conciseness; a failed factual-grounding gate zeros a round.
 
-## Full-suite task success: update 0 versus 12
-
-Each pass evaluates one stochastic episode for each frozen scenario at each checkpoint. The suite contains 120 training and 30 held-out validation scenarios. Success is the native CookSim `won` outcome. The table reports the mean and **sample SD** of the three pass success percentages. Δ is update 12 minus update 0, calculated before rounding.
-
-| Split | Update | Successes / episodes | Scenarios / pass | Mean success ± SD | Δ mean |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Train | 0 | 116/360 | 120 | 32.22% ± 4.28 pp | — |
-| Train | 12 | **152/360** | 120 | **42.22% ± 2.93 pp** | **+10.00 pp** |
-| Validation | 0 | 30/90 | 30 | 33.33% ± 3.33 pp | — |
-| Validation | 12 | **38/90** | 30 | **42.22% ± 6.94 pp** | **+8.89 pp** |
-| Overall | 0 | 146/450 | 150 | 32.44% ± 4.07 pp | — |
-| Overall | 12 | **190/450** | 150 | **42.22% ± 2.52 pp** | **+9.78 pp** |
-
-The passes reuse the same scenario catalog, so SD measures stochastic rollout variation on fixed tasks, not uncertainty over unseen tasks. The validation scenarios are held-out parent variants from the same recipe/layout condition cells; this is development validation, not an unseen-domain test. The user and policy are stochastic, and three passes are too few for a strong statistical claim.
-
-## Interaction quality: preliminary Gemini-only judgment
-
-AQ scores the assistant's utterances against the observed kitchen state and the cook's needs, independently of task success. CookSim's native five-category rubric grades factual grounding, situational relevance, actionable guidance, user intent uptake, and conciseness; a failed factual-grounding gate zeros a round. The official AQ averages independent Gemini and GPT judgments per round. **Only Gemini judgments are complete for this comparison.**
-
-Usable reports and decision traces exist at both checkpoints for **104 matched scenario-pass pairs**, of the 450 full-suite episode instances per checkpoint. This selected subset cannot estimate full-suite AQ. It contains 95 train and only nine validation pairs; the validation-only row below is a descriptive pooled score, not a three-pass estimate.
-
-| AQ scope | Matched / full episode instances | Passes covered | Assistant rounds u0 | Assistant rounds u12 | Gemini AQ u0 | Gemini AQ u12 | AQ Δ |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Train | 95/360 | 3/3 | 6,521 | 6,094 | 23.5% ± 0.3 pp | 32.5% ± 1.9 pp | +9.0 pp |
-| Validation only, partial | 9/90 | 2/3 | 559 | 416 | 27.1% (pooled) | 31.4% (pooled) | +4.3 pp |
-| Train + validation | 104/450 | 3/3 | 7,080 | 6,510 | 23.7% ± 0.5 pp | 32.5% ± 1.8 pp | +8.8 pp |
-
-For train and train + validation, each pass pools all assistant rounds in its matched episodes; the table gives the mean and **population SD** of the three pass-level scores. Pair coverage differs by pass (48, 42, 14), so the SD also reflects changing scenario composition. The validation-only row instead pools all 559 update-0 and 416 update-12 graded rounds across its nine matched pairs: eight pairs in pass 1, one in pass 2, and none in pass 3. Its +4.3 pp difference is **not comparable as a three-pass AQ estimate** and is highly sensitive to the available cases and episode lengths. All 208 paired episodes and 13,590 assistant rounds received Gemini verdicts. The exact agent-visible image was recovered for every graded decision; the upstream scorer used its recorded-evidence fallback for kitchen state. The missing GPT component prevents an official CookSim AQ claim.
+The development-validation cases are held-out parent variants from recipe/layout cells also represented in training; the RL split has **no separate frozen test set**. Requests for the pinned `gemini-3.7-flash` user were routed to effective `gemini-3.8-flash` in the new evaluation, so its absolute success rates are not directly comparable to September's. Repeated passes on fixed scenarios measure rollout variability, not uncertainty over new tasks. Three passes are too few for a strong statistical claim. Source artifacts are listed below.
 
 <details>
 <summary>Per-pass results and validation AQ coverage</summary>
+
+The new complete-trace validation success counts, for passes 1–3 respectively, are **20/30, 21/30, 17/30** at update 0 and **19/30, 23/30, 19/30** at update 12. All six passes passed strict verification. The full AQ input set contains 90 paired scenario-passes and 11,151 assistant rounds per judge; two-judge scoring is ongoing. See `/gpfs/scrubbed/zixianma/checkpoints/web/cooksim-validation-aq-20261019/RUN_PLAN.md`.
+
+The original full-suite overall success counts were 146/450 (32.44% ± 4.07 pp) at update 0 and 190/450 (42.22% ± 2.52 pp) at update 12. The original selected-subset Gemini AQ pooled train and validation was 23.7% ± 0.5 pp versus 32.5% ± 1.8 pp across 104 matched pairs per checkpoint (7,080 and 6,510 assistant rounds respectively). Those selected-subset scores do not estimate full-suite AQ.
 
 | Pass | Train success u0 | Train success u12 | Validation success u0 | Validation success u12 | Overall success u0 | Overall success u12 |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
