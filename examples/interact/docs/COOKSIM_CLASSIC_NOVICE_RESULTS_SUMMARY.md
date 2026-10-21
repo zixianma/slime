@@ -85,7 +85,7 @@ task_success + 0.30 × any_error_prevented
              − 0.05 × min(assistant_turns / 200, 1)
 ```
 
-The design makes completing the cooking task the primary objective: a successful episode always earns more than an unsuccessful one, even at the most adverse shaping values. Every training episode has exactly one planned error. The 0.30 term rewards preventing that error rather than merely flagging it; the capped false-flag penalty discourages speculative interventions, and the smaller turn penalty discourages unnecessarily long exchanges. This supports useful interaction without replacing the task objective, but does not directly optimize recall of every offered error in evaluation.
+The design makes completing the cooking task the primary objective: a successful episode always earns more than an unsuccessful one, even at the most adverse shaping values. Every training episode has exactly one planned error, but the trajectory may end before that error is offered. The 0.30 term rewards preventing an offered error rather than merely flagging it; the capped false-flag penalty discourages speculative interventions, and the smaller turn penalty discourages unnecessarily long exchanges. This supports useful interaction without replacing the task objective, but does not directly optimize recall of every offered error in evaluation.
 
 The first-four-of-five collector may favor shorter episodes. Online development validation samples 10 scenarios twice at updates 0, 3, 6, 9, and 12; the **full-suite comparison above** instead uses all 120 train and 30 frozen validation scenarios once per pass. See the [CookSim Gemini handoff](COOKING_GEMINI_HANDOFF.md) and [full-suite evaluation protocol](FULL_SUITE_EVAL.md) for setup and checkpoint accounting.
 
