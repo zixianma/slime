@@ -55,6 +55,8 @@ For the eight matched validation scenarios in pass 1, Gemini AQ is 24.8% at upda
 <details>
 <summary>Other simulator diagnostics</summary>
 
+**New complete-trace validation detection audit.** The native engine offered 54 errors at update 0 and 56 at update 12; valid structured flags fell from 22 to 15. In the 46 matched scenario-pass pairs where an error was offered at both checkpoints, valid detection fell from 18 to 12: 13 pairs lost a detection and seven gained one. Of the 13 losses, six update-12 rollouts had no structured flag attached to the offered error and seven had only wrong-name flags. Across all offered errors, the largest label-level declines were `leave_unattended` (7/8 to 4/8) and `forget_next_step` (3/5 to 1/6); `mis_prep` stayed at 6/12. False-positive flags fell from 517 to 391 across the 90 episodes, while assistant turns rose from 12,701 to 13,191. This pattern points to fewer or misnamed flags, rather than less error exposure or shorter episodes, as the immediate reason measured recall fell. The stochastic trajectories and ten held-out parent cases do not isolate why the policy changed its flagging behavior.
+
 The following are pooled over 450 episodes per checkpoint. Mistake exposure and episode length depend on the policy rollout, so these metrics are descriptive rather than controlled substitutes for task success.
 
 | Update | Prevented / offered errors | Prevention % | False flags | False flags / episode | Assistant turns | Turns / episode | Invalid responses / turns | Invalid % | Timeouts / episodes | Timeout % |
