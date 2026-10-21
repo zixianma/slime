@@ -6,18 +6,18 @@ On the primary scenario-weighted strict-success measure, **none of the four comp
 
 The assistant is Qwen3.5-4B and the simulated user is Gemini 3.7 Flash. “Manual” means the assistant receives the task manual in **training, development, and test**. Each method has separate update-0 and update-12 rows. Strict success requires the requested phone state by the deadline without lasting unrequested changes. Δ is update 12 minus update 0 in percentage points (pp), calculated before rounding; **bold ↑** marks a numerical gain, not a statistically established improvement. Dashes in update-0 delta cells mean the comparison is not applicable.
 
-| Method (user; assistant manual) | Update | Train count | Train success % | Train Δ pp | Dev count | Dev success % | Dev Δ pp | Frozen-test count | Frozen-test success % | Test Δ pp |
+| Method (user; assistant manual) | Update | Train count | Train success, mean ± SD | Train Δ pp | Dev count | Dev success, mean ± SD | Dev Δ pp | Frozen-test count | Frozen-test success, mean ± SD | Test Δ pp |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline; no manual | 0 | 90/408 | 22.1% | — | 5/32 | 15.6% | — | 25/90 | 27.8% | — |
-| Baseline; no manual | 12 | **94/408** | **23.0%** | **↑ +1.0** | **8/32** | **25.0%** | **↑ +9.4** | 23/90 | 25.6% | −2.2 |
-| Baseline; manual | 0 | 85/408 | 20.8% | — | 19/96 | 19.8% | — | 25/90 | 27.8% | — |
-| Baseline; manual | 12 | 54/408 | 13.2% | −7.6 | 6/96 | 6.3% | −13.5 | 15/90 | 16.7% | −11.1 |
-| Classic novice; no manual | 0 | 11/408 | 2.7% | — | 2/96 | 2.1% | — | 3/90 | 3.3% | — |
-| Classic novice; no manual | 12 | 9/408 | 2.2% | −0.5 | **4/96** | **4.2%** | **↑ +2.1** | **4/90** | **4.4%** | **↑ +1.1** |
-| Classic novice; manual | 0 | 39/408 | 9.6% | — | 4/96 | 4.2% | — | 8/90 | 8.9% | — |
-| Classic novice; manual | 12 | 26/408 | 6.4% | −3.2 | **6/96** | **6.3%** | **↑ +2.1** | 5/90 | 5.6% | −3.3 |
+| Baseline; no manual | 0 | 90/408 | 22.1% ± 2.0 pp | — | 5/32 | 15.6% (1 pass) | — | 25/90 | 27.8% ± 6.9 pp | — |
+| Baseline; no manual | 12 | **94/408** | **23.0% ± 1.8 pp** | **↑ +1.0** | **8/32** | **25.0% (1 pass)** | **↑ +9.4** | 23/90 | 25.6% ± 1.9 pp | −2.2 |
+| Baseline; manual | 0 | 85/408 | 20.8% ± 2.6 pp | — | 19/96 | 19.8% ± 1.8 pp | — | 25/90 | 27.8% ± 10.7 pp | — |
+| Baseline; manual | 12 | 54/408 | 13.2% ± 0.7 pp | −7.6 | 6/96 | 6.3% ± 0.0 pp | −13.5 | 15/90 | 16.7% ± 3.3 pp | −11.1 |
+| Classic novice; no manual | 0 | 11/408 | 2.7% ± 0.8 pp | — | 2/96 | 2.1% ± 1.8 pp | — | 3/90 | 3.3% ± 3.3 pp | — |
+| Classic novice; no manual | 12 | 9/408 | 2.2% ± 0.0 pp | −0.5 | **4/96** | **4.2% ± 1.8 pp** | **↑ +2.1** | **4/90** | **4.4% ± 1.9 pp** | **↑ +1.1** |
+| Classic novice; manual | 0 | 39/408 | 9.6% ± 2.0 pp | — | 4/96 | 4.2% ± 1.8 pp | — | 8/90 | 8.9% ± 1.9 pp | — |
+| Classic novice; manual | 12 | 26/408 | 6.4% ± 1.8 pp | −3.2 | **6/96** | **6.3% ± 3.1 pp** | **↑ +2.1** | 5/90 | 5.6% ± 3.8 pp | −3.3 |
 
-The baseline/no-manual **development** cells use one complete pass of 32 scenarios per checkpoint. Every other development cell uses three passes (96 rollouts); every frozen-test cell uses three passes (90 rollouts). Each available train comparison uses three passes of 136 scenarios (408 rollouts). Repeated passes revisit the same scenarios and therefore measure rollout variability, not uncertainty across new tasks. Differences of one or two successes are especially fragile. The two personas also differ in difficulty, so comparing their raw rates does not isolate the manual’s effect.
+The SD is the **sample SD of pass-level success percentages**; a single pass has no pass-to-pass SD. The baseline/no-manual **development** cells use one complete pass of 32 scenarios per checkpoint. Every other development cell uses three passes (96 rollouts); every frozen-test cell uses three passes (90 rollouts). Each available train comparison uses three passes of 136 scenarios (408 rollouts). Repeated passes revisit the same scenarios and therefore measure rollout variability, not uncertainty across new tasks. Differences of one or two successes are especially fragile. The two personas also differ in difficulty, so comparing their raw rates does not isolate the manual’s effect.
 
 ## Interaction quality across four conditions
 
@@ -188,18 +188,18 @@ Source reports: `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-rl-library-ge
 
 The classic-novice/no-manual run continued from update 12 to update 24. In this consistent no-manual condition, the update-24 frozen-test result is five more successes than update 0 on the same 30 scenarios over three stochastic passes; it is a separate 24-update comparison.
 
-| Update | Split | Success count | Success % |
+| Update | Split | Success count | Success, mean ± SD |
 | ---: | --- | ---: | ---: |
-| 24 | Development | 2/96 | 2.1% |
-| 24 | Frozen test | 8/90 | 8.9% |
+| 24 | Development | 2/96 | 2.1% ± 3.6 pp |
+| 24 | Frozen test | 8/90 | 8.9% ± 5.1 pp |
 
 An earlier evaluation of this run inadvertently supplied a manual **only at test time**, although training and development used no manual:
 
-| Test context | Update | Success count | Success % |
+| Test context | Update | Success count | Success, mean ± SD |
 | --- | ---: | ---: | ---: |
-| Manual only at test | 0 | 4/90 | 4.4% |
-| Manual only at test | 12 | 11/90 | 12.2% |
-| Manual only at test | 24 | 8/90 | 8.9% |
+| Manual only at test | 0 | 4/90 | 4.4% ± 3.8 pp |
+| Manual only at test | 12 | 11/90 | 12.2% ± 1.9 pp |
+| Manual only at test | 24 | 8/90 | 8.9% ± 1.9 pp |
 
 These independent passes are not paired with the consistent no-manual test passes in the main table and do not estimate a causal manual effect. The corrected no-manual test results are in the main table and the update-24 table above.
 
