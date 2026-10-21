@@ -1,6 +1,17 @@
 # CookSim RL with the classic-novice Gemini user
 
-The Qwen3.5-4B assistant's **strict task success increased at update 12** on the frozen 150-scenario suite: 32.44% to 42.22% overall across three passes (+9.78 percentage points). Train and validation both increased on the same frozen scenarios. This is a small proof-of-concept RL run with a stochastic Gemini 3.7 Flash user, not evidence of broad task generalization. Preliminary Gemini-only interaction quality (AQ) also increased on a **selected matched subset**; the full-suite AQ and the official two-judge AQ are unavailable.
+The Qwen3.5-4B assistant's **strict task success increased at update 12** on the frozen 150-scenario suite: 32.44% to 42.22% overall across three passes (+9.78 percentage points). Train and validation both increased on the same frozen scenarios. A newer, independently sampled three-pass validation evaluation with complete interaction records succeeded on 58/90 episodes at update 0 and 61/90 at update 12. Its two-judge interaction-quality (AQ) scoring is in progress. This is a small proof-of-concept RL run, not evidence of broad task generalization.
+
+## New complete-trace validation evaluation
+
+Each checkpoint was evaluated once per pass on the same 30 held-out development-validation scenarios, for three stochastic passes and 90 episodes per checkpoint. Every episode has a native report, assistant-decision record, and training audit; all six passes passed strict trace verification. The numbers below describe this **new validation-only evaluation**, distinct from the earlier full-suite results in the next section.
+
+| Update | Pass 1 successes / episodes | Pass 2 successes / episodes | Pass 3 successes / episodes | Total successes / episodes | Pooled success | Δ pooled |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 20/30 | 21/30 | 17/30 | 58/90 | 64.4% | — |
+| 12 | 19/30 | 23/30 | 19/30 | 61/90 | 67.8% | +3.3 pp |
+
+The comparison reuses the same scenario IDs but samples new stochastic episodes. The split has 120 training and 30 development-validation scenarios and **no separate frozen test split**; the validation cases are held-out parent variants from recipe/layout cells also represented in training. Requests for the pinned `gemini-3.7-flash` user were routed to effective `gemini-3.8-flash` in this new evaluation, so these success rates should not be combined with the earlier September evaluation as if they shared the same user-model version. All 180 detailed episodes are linked from `/gpfs/scrubbed/zixianma/checkpoints/web/cooksim-validation-aq-20261019/RUN_PLAN.md`; two-judge AQ on those episodes is pending.
 
 ## Full-suite task success: update 0 versus 12
 
