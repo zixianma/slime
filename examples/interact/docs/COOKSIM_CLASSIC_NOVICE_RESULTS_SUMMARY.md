@@ -50,7 +50,7 @@ The standard errors of mean task success are 2.47, 1.92, and 2.35 pp at update 0
 | 2 | 41 | 1 | 23.7% | 34.9% | 24.1% | 34.8% |
 | 3 | 14 | 0 | 23.0% | 32.2% | 23.0% | 32.2% |
 
-For the eight matched validation scenarios in pass 1, Gemini AQ is 24.8% at update 0 and 31.5% at update 12. Pass 2 has only one matched validation scenario (34.4% versus 30.7%); pass 3 has none. These descriptive values are not a validation-set AQ estimate.
+For the eight matched validation scenarios in pass 1, Gemini AQ is 24.8% at update 0 and 31.5% at update 12. Pass 2 has only one matched validation scenario (34.4% versus 30.7%); pass 3 has none. Across the **two available pass scores**, the unweighted mean ± population SD is 29.6% ± 4.8 pp at update 0 and 31.1% ± 0.4 pp at update 12. These differ from the round-pooled 27.1% and 31.4% in the headline table because one pass contributes eight episodes and the other just one. Neither the two-pass summary nor the pooled values estimate full-validation AQ or a three-pass validation SD.
 
 </details>
 
