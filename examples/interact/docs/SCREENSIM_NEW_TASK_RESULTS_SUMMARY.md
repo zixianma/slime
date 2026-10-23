@@ -51,16 +51,22 @@ The independent Gemini judge gives a sensitivity check. The scorer requested Gem
 
 AQ is the mean of pass-level scores, each pooling its rubric-applicable assistant rounds; SD is the **population SD** across three passes, and Δ uses unrounded means. Update 0 and 12 use the same scenario IDs within each pass; assistant-round counts differ with trajectory length. The original four-condition batch contains 1,360 judged episodes and 23,817 assistant rounds. The two additional baseline/no-manual dev passes at each update add 128 judged episodes and 1,788 assistant rounds, yielding 1,488 judged episodes and 25,605 assistant rounds across both batches. Both judges returned verdicts for all of these episodes and rounds. One GPT-judged round in the original batch had no applicable rubric item and is excluded from its AQ denominator; Gemini had an applicable score for every round. Complete verification, per-judge summaries, and verdicts are under `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-interaction-quality-nomanual-20261019/` and `/gpfs/scrubbed/zixianma/checkpoints/web/screensim-baseline-nomanual-dev-repeats-20261021/`.
 
-## Baseline user without a manual: native error detection
+## No-manual users: native error detection
 
 The native `detected` verdict is the union of the simulated person's call and the engine's flag verdict; it is **not** an assistant-only explicit-naming metric. Recall divides detected fired mistakes by all fired mistakes. Pass SD is the sample SD of the three pass-level recall percentages, while pooled recall uses the total counts; changing error exposure across rollouts limits causal interpretation.
 
-| Split | Update | Detected / fired | Pooled recall | Pass mean ± SD | False flags |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Dev | 0 | 125/137 | 91.2% | 91.2% ± 1.1 pp | 118 |
-| Dev | 12 | 133/140 | 95.0% | 94.9% ± 4.7 pp | 198 |
-| Frozen test | 0 | 129/151 | 85.4% | 85.4% ± 3.2 pp | 77 |
-| Frozen test | 12 | 134/151 | 88.7% | 88.7% ± 6.1 pp | 122 |
+| User | Split | Update | Detected / fired | Pooled recall | Pass mean ± SD | False flags |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | Dev | 0 | 125/137 | 91.2% | 91.2% ± 1.1 pp | 118 |
+| Baseline | Dev | 12 | 133/140 | 95.0% | 94.9% ± 4.7 pp | 198 |
+| Baseline | Frozen test | 0 | 129/151 | 85.4% | 85.4% ± 3.2 pp | 77 |
+| Baseline | Frozen test | 12 | 134/151 | 88.7% | 88.7% ± 6.1 pp | 122 |
+| Classic novice | Dev | 0 | 51/52 | 98.1% | 97.6% ± 4.1 pp | 288 |
+| Classic novice | Dev | 12 | 40/43 | 93.0% | 93.3% ± 6.7 pp | 395 |
+| Classic novice | Frozen test | 0 | 42/52 | 80.8% | 80.3% ± 10.4 pp | 203 |
+| Classic novice | Frozen test | 12 | 52/61 | 85.2% | 85.1% ± 10.1 pp | 353 |
+
+Classic-novice counts were recomputed from the fired beats and `detected` flags in all 96 development episodes per update and all 90 corrected no-manual frozen-test episodes per update. The development aggregate's older test episodes are excluded because that evaluation supplied a manual on test. The fired-error denominators differ between checkpoints because stochastic trajectories expose different opportunities.
 
 ## Other evaluation metrics
 
