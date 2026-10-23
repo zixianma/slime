@@ -68,6 +68,8 @@ The native `detected` verdict is the union of the simulated person's call and th
 
 Classic-novice counts were recomputed from the fired beats and `detected` flags in all 96 development episodes per update and all 90 corrected no-manual frozen-test episodes per update. The development aggregate's older test episodes are excluded because that evaluation supplied a manual on test. The fired-error denominators differ between checkpoints because stochastic trajectories expose different opportunities.
 
+The calculation matches the native `detected / n_fired` formula in `screensim/interact/composite_run_v2.py`. On 2026-10-23, this file, `screensim/interact/grade.py`, and `tools/sample_summary.py` were byte-identical to `hellomuffin/screensim-engine` main at `6f566fa7c47b3a4772909cae5e618c9085557d9c`. The saved episodes were generated earlier under their stamped engine revisions; this code check verifies the detection metric, not that the full simulator was rerun at the current upstream head.
+
 ## Other evaluation metrics
 
 **Task-macro strict success** averages each task’s scenario success rate, then weights the tasks equally. It can move differently from the scenario-weighted primary metric because tasks have different numbers of scenarios.
