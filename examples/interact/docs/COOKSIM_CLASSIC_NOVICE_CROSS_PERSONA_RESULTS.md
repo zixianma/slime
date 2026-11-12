@@ -2,26 +2,21 @@
 
 The frozen Qwen3.5-4B assistant trained with a **classic-novice** simulated cook showed **no task-success gain** on either alternate user persona in this transfer test. On the same 30 held-out CookSim validation scenarios, update 0 and update 12 succeeded equally often with the **classic-expert** user (83/90 episodes each); with the **baseline** user, success was 82/90 versus 80/90. Each checkpoint–persona cell has three stochastic passes, so 90 episodes reuse **30 distinct scenarios**, not 90 independent tasks. The three-pass estimates are too small to establish equivalence or a reliable decline.
 
-| Evaluation user | Checkpoint | Successes | Episodes | Success, pass mean ± SD | AQ-scored episodes | AQ, pass mean ± SD |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline | Update 0 | 82 | 90 | 91.1% ± 5.1 pp | 90 | 10.24% ± 1.45 pp |
-| Baseline | Update 12 | 80 | 90 | 88.9% ± 1.9 pp | 90 | 14.83% ± 2.71 pp |
-| Classic expert | Update 0 | 83 | 90 | 92.2% ± 1.9 pp | 0 | Pending separate AQ judging |
-| Classic expert | Update 12 | 83 | 90 | 92.2% ± 3.8 pp | 0 | Pending separate AQ judging |
+| Evaluation user | Checkpoint | Pass 1 successes | Pass 2 successes | Pass 3 successes | Total successes | Episodes | Success, pass mean ± SD | AQ-scored episodes | AQ, pass mean ± SD |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline | Update 0 | 29 | 27 | 26 | 82 | 90 | 91.1% ± 5.1 pp | 90 | 10.24% ± 1.45 pp |
+| Baseline | Update 12 | 27 | 26 | 27 | 80 | 90 | 88.9% ± 1.9 pp | 90 | 14.83% ± 2.71 pp |
+| Classic expert | Update 0 | 27 | 28 | 28 | 83 | 90 | 92.2% ± 1.9 pp | 0 | Pending separate AQ judging |
+| Classic expert | Update 12 | 29 | 27 | 27 | 83 | 90 | 92.2% ± 3.8 pp | 0 | Pending separate AQ judging |
+
+Each pass contains 30 scenarios, so the pass columns give counts out of 30; the success percentage and SD summarize the three pass percentages.
 
 The paired pass-mean success change is **−2.2 percentage points** with the baseline user and **0.0 points** with the classic-expert user. In contrast, baseline-user Assistance Quality (AQ) rose **+4.59 points** and improved on all three passes. AQ is the Gemini-only SQ v4 mean of per-utterance rubric scores, pooling assistant turns within each pass and averaging the three pass scores equally. Its five axes assess factual grounding, situational relevance, actionable guidance, user-intent uptake, and conciseness. The baseline AQ gain does not imply a task-success gain; classic-expert AQ has not yet been judged.
 
 Both transfer evaluations kept the 30-case scenario catalog, assistant checkpoints, seeds, renderer, and simulator service fixed while changing the persona. The service reported **Gemini 3.8 Flash** as the effective simulated-user model throughout. These tests probe persona sensitivity within one model service, not transfer to a different user-model family or to human cooks. Policy-dependent trajectories change which errors are offered, and the two personas produce different conversations, so their absolute success and AQ values are descriptive comparisons rather than isolated persona effects.
 
 <details>
-<summary>Pass-level success and native interaction diagnostics</summary>
-
-| Evaluation user | Checkpoint | Pass 1 | Pass 2 | Pass 3 | Paired mean change vs. update 0 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Baseline | Update 0 | 29/30 | 27/30 | 26/30 | — |
-| Baseline | Update 12 | 27/30 | 26/30 | 27/30 | −2.2 pp |
-| Classic expert | Update 0 | 27/30 | 28/30 | 28/30 | — |
-| Classic expert | Update 12 | 29/30 | 27/30 | 27/30 | 0.0 pp |
+<summary>Native interaction diagnostics</summary>
 
 The native audit records a valid detection only when an error is offered and the assistant flags it; prevention is a separate outcome. Error exposure varies with the trajectory. Across the three passes, detection and prevention fell at update 12 under both alternate personas, while false flags fell and assistant turns rose. These are descriptive episode totals, not causal estimates of the reward terms.
 
