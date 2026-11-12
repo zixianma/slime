@@ -1,0 +1,25 @@
+# Staged GPU plan for the RL rebuttal (12 November 2026)
+
+**Decision.** Start with the two studies that directly test generalization: a paired one-case OpenAI-user compatibility pilot and one paired pass over 19 recipe-disjoint CookSim cases. Keep the remaining passes and lower-priority studies on user hold until the first results and actual elapsed GPU time are audited. This makes the **currently released maximum 20 H200 GPU-hours**, compared with 102 H200 GPU-hours if every submitted task were allowed to run to its wall limit. No queued GPU task had started when the holds were set.
+
+| Study / Slurm job | Distinct cases | Episodes if released work completes | H200-hour hard limit | Current disposition |
+| --- | ---: | ---: | ---: | --- |
+| GPT-5.4 Mini user pilot, `459159` | 1 | 2 | 4 | Released: both checkpoint tasks. |
+| Unseen-recipe pass 1, `459271_0–1` | 19 | 38 | 16 | Released: update 0 and 12. |
+| Unseen-recipe passes 2–3, `459271_2–5` | Same 19 | 76 | 32 | Held pending first-pass audit. |
+| V5 changed-error full suite, `459273` | 10 | 60 | 34 | Held pending first-wave audit. |
+| One-update reward-pilot recovery, `459272` | 120 training cases in its catalog; one-update sample only | 20 initial-eval + up to 24 training rollouts | 16 | Held; no post-update evaluation is included in this job. |
+| **Total submitted GPU ceiling** | — | — | **102** | **20 released; 82 held.** |
+
+The user approved 120 *additional* H200 GPU-hours for the three Gemini studies; their queued maximum is 98, leaving 22 unallocated hours. The OpenAI pilot has its separate 4-hour ceiling. These are worst-case allocation limits, not measured consumption or a claim about the cluster's remaining account balance. Slurm currently exposes no monetary balance for the `vlm` association through the available account commands, so no claim is made about remaining cluster credit. The normal-priority queue estimates startup around 14 November, subject to change.
+
+The OpenAI pilot's shared guard is $20 against the $200 aggregate OpenAI ceiling. The three Gemini jobs retain fail-closed incremental subcaps of $50 (unseen recipe), $50 (v5), and $58 (reward recovery). Earlier conservative Gemini commitments are about $632.16, so even all three new subcaps would be about $790.16 against the $1,000 aggregate Gemini ceiling. The four-arm, 12-update reward ablation is **not** funded by these submissions; extrapolating the $51.98 one-update pilot to 48 arm-updates suggests it would exceed the remaining API allowance by a large margin. That extrapolation is only a planning warning, not a measured ablation cost.
+
+## Decision gates
+
+1. **After the first wave:** verify both Slurm task pairs, complete native episode records, frozen case IDs, effective user-model IDs, offered-error counts, actual GPU-hours, and settled plus reserved API cost. A failed or incomplete result gets diagnosis and a bounded repair before any expansion; elapsed time from failures remains charged.
+2. **Unseen-recipe expansion:** decide on passes 2–3 using the predeclared need for rollout-variance estimates and observed runtime/coverage, without choosing based on whether update 12 appears better. Release at most the held 32-hour ceiling if the first pass is technically valid and affordable. The 19 cases remain the independent task breadth even after three passes.
+3. **Changed-error distribution:** the earlier one-case pilot offered only one of two scheduled errors. Before releasing `459273`, check whether its 10 frozen parents and native-outcome protocol answer an error-exposure question; report offered rather than merely scheduled errors. If the first-wave accounting makes 34 hours too costly, replace the held array with a smaller, separately verified one-pass evaluation instead of silently changing its dataset.
+4. **Reward recovery:** release only if a saved update-1 checkpoint is still worth the 16-hour ceiling after the transfer evidence. This job does not evaluate the new checkpoint because its training configuration evaluates every three updates. Do not describe it as a completed ablation or post-training improvement.
+
+The zero-GPU after-any jobs attached to the full arrays remain dependent on *all* tasks, including held ones. The first-pass gate therefore requires a live inspection of `459271_0–1` artifacts; the verifier for `459271` will not fire until its other four tasks are released or otherwise resolved. The postflight jobs record evidence but cannot perform active diagnosis or repair. See [current experiment status](ICLR_2027_RL_REBUTTAL_STATUS_20261112.md); the local recovery handoff is `rl-review-heldout-cooksim-20261110/full-eval/HANDOFF.md` in the scrubbed workspace.

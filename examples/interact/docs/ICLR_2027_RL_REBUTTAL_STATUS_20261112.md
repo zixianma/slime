@@ -1,5 +1,7 @@
 # RL rebuttal experiments: results and execution status (12 November 2026)
 
+**GPU budget update:** [staged release plan](ICLR_2027_RL_GPU_BUDGET_PLAN_20261112.md). Only the OpenAI pilot and first unseen-recipe pass are released (20 H200-hour maximum); the other 82 queued H200-hours are on user hold pending an actual-cost and trace audit.
+
 **Controlled result.** The classic-novice-trained CookSim Qwen3.5-4B assistant (update 12) improved Gemini-judged assistance quality on two alternate personas, but did **not** improve their task success. Each persona/checkpoint used three stochastic passes of the **same 30 held-out cases** (90 episodes, 30 distinct task configurations). The [public benchmark protocol](https://github.com/SalesforceAIResearch/Interactive-Visual-Gym/blob/main/docs/benchmark_protocol.md#terminology) defines a case as a task configuration with scheduled human events and an episode as one execution with a persona and assistant. The effective simulated-user service was Gemini 3.8 Flash throughout. See the [complete cross-persona table](COOKSIM_CLASSIC_NOVICE_CROSS_PERSONA_RESULTS.md) for counts, pass-level SD, detection denominators, and judge protocol.
 
 | Evaluation user | Update 0 success | Update 12 success | Success change | Update 0 AQ | Update 12 AQ | AQ change |
