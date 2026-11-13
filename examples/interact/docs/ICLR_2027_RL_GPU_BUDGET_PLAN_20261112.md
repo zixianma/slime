@@ -4,7 +4,7 @@
 
 | Study / Slurm job | Distinct cases | Episodes if released work completes | H200-hour hard limit | Current disposition |
 | --- | ---: | ---: | ---: | --- |
-| GPT-5.4 Mini user pilot, `459159` | 1 | 2 | 4 | Released: both checkpoint tasks. |
+| GPT-5.4 Mini user pilot, recovery `461002` | 1 | 2 | 3.93 new + 0.007 spent | Released: both checkpoint tasks; combined maximum remains below 4. |
 | Unseen-recipe pass 1, `459271_0–1` | 19 | 38 | 16 | Released: update 0 and 12. |
 | Unseen-recipe passes 2–3, `459271_2–5` | Same 19 | 76 | 32 | Held pending first-pass audit. |
 | V5 changed-error full suite, `459273` | 10 | 60 | 34 | Held pending first-wave audit. |
@@ -12,6 +12,8 @@
 | **Total submitted GPU ceiling** | — | — | **102** | **20 released; 82 held.** |
 
 The user approved 120 *additional* H200 GPU-hours for the three Gemini studies; their queued maximum is 98, leaving 22 unallocated hours. The OpenAI pilot has its separate 4-hour ceiling. These are worst-case allocation limits, not measured consumption or a claim about the cluster's remaining account balance. Slurm currently exposes no monetary balance for the `vlm` association through the available account commands, so no claim is made about remaining cluster credit. The normal-priority queue estimates startup around 14 November, subject to change.
+
+The original OpenAI array `459159` started sooner than estimated and failed during its unpaid scripted rendering preflight after 7 and 6 seconds (0.00722 H200-hours total). The probe had retained an OpenAI-only backend field when switching the cook to scripted mode. That field is now cleared and the exact scripted pilot configuration passes validation. Recovery `461002` has 59-minute task limits to keep total study GPU time below four hours, retains the same $20 API guard, and has dependent zero-GPU verifier `461003`. No OpenAI user call was made in the failed attempt; its failure receipt is preserved.
 
 Historical timing suggests actual usage could be lower than these wall-limit ceilings. Earlier six-job, 180-episode CookSim validation used 36.9 H200-hours; proportional scaling would put the 38-episode unseen-recipe first pass near **7.8 H200-hours**, but new recipes may take longer. The successful one-case v5 pair ran for 690 and 652 seconds on two H200s per task, totaling about **0.75 H200-hours for two episodes**; linear scaling to 60 episodes suggests roughly **22.4 H200-hours**, with substantial uncertainty from longer multi-error trajectories. The failed reward pilot reached checkpoint saving after roughly **10.9 H200-hours**. These are planning estimates, not additional spending authorization or reliable completion-time predictions.
 
